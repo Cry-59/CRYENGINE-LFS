@@ -3038,8 +3038,6 @@ int CRigidEntity::PostStepNotify(float time_interval,pe_params_buoyancy *pb,int 
 			m_pEvent->dt += time_interval;
 			m_pEvent->idStep = m_pWorld->m_idStep;
 			m_pEvent->pos = m_posNew; m_pEvent->q = m_qNew;	
-			if (m_bProcessed & PENT_SETPOSED)
-				AtomicAdd(&m_bProcessed, -PENT_SETPOSED);
 		}	else {
 			m_pEvent = 0;
 			m_pWorld->OnEvent(m_flags&pef_log_poststep,&event,&m_pEvent);

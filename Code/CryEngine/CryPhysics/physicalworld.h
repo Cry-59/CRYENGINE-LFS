@@ -14,7 +14,6 @@ const int PLACEHOLDER_CHUNK_SZLG2 = 8;
 const int PLACEHOLDER_CHUNK_SZ = 1<<PLACEHOLDER_CHUNK_SZLG2;
 const int QUEUE_SLOT_SZ = 8192;
 
-const int PENT_SETPOSED = 1<<16;
 const int PENT_QUEUED_BIT = 17;
 const int PENT_QUEUED = 1<<PENT_QUEUED_BIT;
 
@@ -432,11 +431,6 @@ public:
 			m_pEventLast = pDst;
 			if (pEventLogged)
 				*pEventLogged = pDst;
-			if (Etype::id==(const int)EventPhysPostStep::id) {
-				CPhysicalPlaceholder *ppc = (CPhysicalPlaceholder*)((EventPhysPostStep*)pEvent)->pEntity;
-				if (ppc->m_bProcessed & PENT_SETPOSED)
-					AtomicAdd(&ppc->m_bProcessed, -PENT_SETPOSED);
-			}
 		}
 		return res;
 	}
@@ -1055,8 +1049,6 @@ template<class T> struct ChangeRequest {
 				}
 			}
 		}
-		if (StructChangesPos(params) && !(pent->m_bProcessed & PENT_SETPOSED))
-			AtomicAdd(&pent->m_bProcessed, PENT_SETPOSED);
 	}
 	~ChangeRequest() { AtomicAdd(&m_pWorld->m_lockStep,-m_bLocked);AtomicAdd(&m_pWorld->m_lockCaller[MAX_PHYS_THREADS],-m_bLockedCaller); }
 	int IsQueued() { return m_bQueued; }

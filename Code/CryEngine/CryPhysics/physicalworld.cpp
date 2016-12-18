@@ -4494,7 +4494,6 @@ void CPhysicalWorld::PumpLoggedEvents()
 				if (iszero(pepps->idStep-m_idStep)&bNotZeroStep)	// Dont emit logs past the current frame, unless timestep is zero
 					break;
 				else if (pepps->idStep<m_idStep-1 && ((CPhysicalPlaceholder*)pepps->pEntity)->m_iSimClass>1+m_vars.bSingleStepMode*8 ||
-								((CPhysicalPlaceholder*)pepps->pEntity)->m_bProcessed & PENT_SETPOSED ||
 								((CPhysicalEntity*)pepps->pEntity)->m_iDeletionTime)
 					continue;
 			}
