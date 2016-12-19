@@ -1002,13 +1002,19 @@ end_sources()
 
 CryEngineModule(CryAction PCH "StdAfx.cpp" SOLUTION_FOLDER "CryEngine")
 
-
 target_link_libraries( ${THIS_PROJECT} PRIVATE md5 yasli)
+
 if (WIN32 OR WIN64)
 	target_link_libraries(${THIS_PROJECT} PRIVATE Shell32)
 endif()
 if(DURANGO)
 	target_link_libraries(${THIS_PROJECT} PRIVATE jsmn)
+endif()
+
+if(OPTION_GAMESDK)
+	target_link_libraries( ${THIS_PROJECT} PRIVATE CryGameSDK )
+elseif(OPTION_GAMEZERO)
+	target_link_libraries( ${THIS_PROJECT} PRIVATE CryGameZero )
 endif()
 
 target_include_directories(CryAction INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<INSTALL_INTERFACE:include/CryAction>)

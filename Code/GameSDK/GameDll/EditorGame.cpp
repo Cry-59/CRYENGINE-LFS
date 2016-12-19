@@ -63,11 +63,6 @@ CEditorGame::~CEditorGame()
 
 //------------------------------------------------------------------------
 
-extern "C" 
-{
-	GAME_API IGameStartup *CreateGameStartup();
-};
-
 bool CEditorGame::Init(ISystem *pSystem,IGameToEditorInterface *pGameToEditorInterface)
 {
 	assert(pSystem);
