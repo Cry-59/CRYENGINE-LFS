@@ -8,6 +8,7 @@ import json
 import shutil
 import subprocess
 import tempfile
+import glob
 
 import win32api, win32con
 from win32com.shell import shell
@@ -24,7 +25,8 @@ def command_title (args):
 	'open': 'Launch game',
 	'monodev': 'Edit code',
 	'switch': 'Switch engine version',
-	'metagen': 'Generate/repair metadata'
+	'metagen': 'Generate/repair metadata',
+	'deploy': 'Deploy build'
 	}.get (args.command, '')
 
 #---
@@ -132,6 +134,7 @@ def cmd_install (args):
 			(False, '_build', 'Build solution', '"%s" build "%%1"' % ScriptPath),
 			(False, '_projgen', 'Generate solution', '"%s" projgen "%%1"' % ScriptPath),			
 			(False, '_switch', 'Switch engine version', '"%s" switch "%%1"' % ScriptPath),
+			(False, '_deploy', 'Deploy build', '"%s" deploy "%%1"' % ScriptPath),
 			(True, 'metagen', 'Generate/repair metadata', '"%s" metagen "%%1"' % ScriptPath),
 		)
 	else:
@@ -148,6 +151,7 @@ def cmd_install (args):
 			(False, '_build', 'Build solution', '"%s" "%s" build "%%1"' % (PythonPath, ScriptPath)),
 			(False, '_projgen', 'Generate solution', '"%s" "%s" projgen "%%1"' % (PythonPath, ScriptPath)),			
 			(False, '_switch', 'Switch engine version', '"%s" "%s" switch "%%1"' % (PythonPath, ScriptPath)),
+			(False, '_deploy', 'Deploy build', '"%s" "%s" deploy "%%1"' % (PythonPath, ScriptPath)),
 			(True, 'metagen', 'Generate/repair metadata','"%s" "%s" metagen "%%1"' % (PythonPath, ScriptPath)),
 		)
 
@@ -438,6 +442,84 @@ def cmd_switch (args):
 	
 	app = CrySwitch (args.project_file, engine_list, found)
 	app.mainloop()
+	
+def copy_file(source_dir, target_dir, relative_file_path):
+	cryplugin_file= os.path.join(source_dir, relative_file_path)
+	if os.path.exists(cryplugin_file):
+		shutil.copyfile(cryplugin_file, os.path.join(target_dir, relative_file_path))
+	
+def copy_file_formats_in_dir(source_dir, target_dir, formats):		
+	for format in formats:
+		for file in glob.iglob(os.path.join(source_dir, "**", format), recursive=True):
+			target_file= os.path.normcase(os.path.join(target_dir, os.path.relpath(file, source_dir)))
+			target_path= os.path.dirname(target_file)
+			
+			if not os.path.exists(target_path):
+				os.makedirs(target_path)
+			
+			shutil.copy(file, target_file)
+	
+		#if os.path.isfile(file):
+			# shutil.copy2(file, target_dir)
+	
+def cmd_deploy (args):
+	if not os.path.isfile (args.project_file):
+		error_project_not_found(args)
+			
+	project= cryproject.load (args.project_file)
+	if project is None:
+		error_project_json_decode (args)
+
+	project_dir = os.path.dirname (args.project_file)
+	engine_id= cryproject.engine_id (project)
+	
+	engines= cryregistry.load_engines ()
+	engine_data= engines.get (engine_id)
+	
+	engine_file= engine_data['uri']
+	engine_dir= os.path.dirname (engine_file)
+		
+	deployment_dir= os.path.join(project_dir, 'Build')	
+	rc_path= os.path.join(engine_dir, "Tools/rc/rc.exe")
+	
+	source_asset_dir= os.path.join(project_dir, cryproject.asset_dir(project))
+	target_asset_dir= os.path.normcase(os.path.join(deployment_dir, cryproject.asset_dir(project)))
+	
+	if not os.path.exists(target_asset_dir):
+		os.makedirs(target_asset_dir)
+	
+	# Copy plugin list
+	copy_file(project_dir, deployment_dir, "cryplugin.csv")
+	
+	# Copy game binaries
+	copy_file_formats_in_dir(os.path.join(project_dir, "bin"), os.path.join(deployment_dir, "bin"), ['*.dll', '*.exe'])
+	
+	# Start copying assets
+	copy_file_formats_in_dir(source_asset_dir, target_asset_dir, ['*.xml', '*.pak', '*.cgf', '*.mtl', '*.cfg'])
+	
+	# Convert textures in assets dir
+	subprocess.check_call([rc_path, "*.tif", "/p=PC", "/sourceroot=" + source_asset_dir, "/targetroot=" + target_asset_dir, "refresh"])
+	
+	# Convert animations in assets dir
+	subprocess.check_call([rc_path, "*.i_caf", "/animConfigFolder=Animations", "/p=PC", "/sourceroot=" + source_asset_dir, "/targetroot=" + target_asset_dir, "refresh"])
+	
+	# Copy engine directory
+	source_engine_assets_dir= os.path.join(engine_dir, "Engine")
+	target_engine_assets_dir= os.path.join(deployment_dir, "Engine")
+	
+	copy_file_formats_in_dir(source_engine_assets_dir, target_engine_assets_dir, ['*.cfg', '*.xml', '*.txt', '*.thread_config', '*.ttf', '*.dds', '*.mtl', '*.abc', '*.cbc', '*.cgf', '*.pfxp', '*.lut', '*.dat', '*.ext', '*.cfi', '*.cfx'])
+	
+	# Convert textures in engine dir
+	subprocess.check_call([rc_path, "*.tif", "/p=PC", "/sourceroot=" + source_engine_assets_dir, "/targetroot=" + target_engine_assets_dir, "refresh"])
+	
+	# Copy engine binaries
+	copy_file_formats_in_dir(os.path.join(engine_dir, "bin"), os.path.join(deployment_dir, "bin"), ['*.dll', '*.exe', '*.py', '*.pyc'])
+	
+	# Create system cfg
+	system_cfg_file = open(os.path.join(deployment_dir, "system.cfg"), "w")
+	system_cfg_file.write("sys_game_folder=" + cryproject.asset_dir(project) + "\n")
+	system_cfg_file.write("sys_dll_game=\"\"\n")
+	system_cfg_file.close()
 
 #--- UPGRADE ---
 
@@ -550,6 +632,10 @@ if __name__ == '__main__':
 	parser_switch= subparsers.add_parser ('switch')
 	parser_switch.add_argument ('project_file')
 	parser_switch.set_defaults(func=cmd_switch)
+	
+	parser_deploy= subparsers.add_parser ('deploy')
+	parser_deploy.add_argument ('project_file')
+	parser_deploy.set_defaults(func=cmd_deploy)
 	
 	#---
 
