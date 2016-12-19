@@ -1092,8 +1092,6 @@ float CLivingEntity::ShootRayDown(le_precomp_entity* pents, int nents, le_precom
 
 void CLivingEntity::AddLegsImpulse(const Vec3 &vel, const Vec3 &nslope, bool bInstantChange)
 {
-	int ncoll;
-	CPhysicalEntity **pColliders/*,*pPrevCollider=m_pLastGroundCollider*/;
 	pe_status_sample_contact_area ssca;
 	RigidBody *pbody;
 	pe_action_impulse ai;
@@ -1102,8 +1100,7 @@ void CLivingEntity::AddLegsImpulse(const Vec3 &vel, const Vec3 &nslope, bool bIn
 	if (m_pLastGroundCollider && m_flags&lef_push_objects &&
 			(unsigned int)m_pLastGroundCollider->m_iSimClass-1u<2u && m_pLastGroundCollider->m_flags & pef_pushable_by_players && 
 			((pbody=m_pLastGroundCollider->GetRigidBody(m_iLastGroundColliderPart))->Minv<m_massinv*10 ||
-			 (ncoll=m_pLastGroundCollider->GetColliders(pColliders))==0 || (ncoll==1 && pColliders[0]==m_pLastGroundCollider)) &&
-			!m_pLastGroundCollider->GetStatus(&ssca))
+			 !m_pLastGroundCollider->GetStatus(&ssca)))
 	{
 		Vec3 vrel = vel;
 		ai.point = ssca.ptTest;
