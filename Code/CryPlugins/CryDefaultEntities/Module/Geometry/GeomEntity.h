@@ -53,8 +53,6 @@ public:
 	// IGeometryEntityComponent
 
 	// IEntityPropertyGroup
-	virtual const char* GetLabel() const override { return "Geometry Properties"; }
-
 	virtual void SerializeProperties(Serialization::IArchive& archive) override
 	{
 		archive(Serialization::ModelFilename(m_model), "Geometry", "Geometry");

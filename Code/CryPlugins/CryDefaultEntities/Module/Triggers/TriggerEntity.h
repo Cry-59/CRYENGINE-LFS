@@ -37,8 +37,6 @@ public:
 	// ~ISimpleExtension
 
 	// IEntityPropertyGroup
-	virtual const char* GetLabel() const override { return "TriggerEntity Properties"; }
-
 	virtual void SerializeProperties(Serialization::IArchive& archive) override
 	{
 		archive(m_bActive, "Active", "Active");

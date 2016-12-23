@@ -28,8 +28,6 @@ public:
 	// ~CDesignerEntityComponent
 
 	// IEntityPropertyGroup
-	virtual const char* GetLabel() const override { return "EnvironmentProbe Properties"; }
-
 	virtual void SerializeProperties(Serialization::IArchive& archive) override
 	{
 		archive(m_bActive, "Active", "Active");

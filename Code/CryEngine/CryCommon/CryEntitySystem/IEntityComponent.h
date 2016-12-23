@@ -47,7 +47,6 @@ struct IEntityPropertyGroup
 {
 	virtual ~IEntityPropertyGroup() {}
 
-	virtual const char*         GetLabel() const = 0;
 	virtual void                SerializeProperties(Serialization::IArchive& archive) = 0;
 };
 

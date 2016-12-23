@@ -51,8 +51,6 @@ public:
 	// ~CDesignerEntityComponent
 
 	// IEntityPropertyGroup
-	virtual const char* GetLabel() const override { return "Light Properties"; }
-
 	virtual void SerializeProperties(Serialization::IArchive& archive) override
 	{
 		archive(m_bActive, "Active", "Active");

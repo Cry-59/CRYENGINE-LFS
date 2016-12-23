@@ -27,8 +27,6 @@ public:
 	// ~CNativeEntityBase
 
 	// IEntityPropertyGroup
-	virtual const char* GetLabel() const override { return "AudioAreaAmbience Properties"; }
-
 	virtual void SerializeProperties(Serialization::IArchive& archive) override
 	{
 		archive(m_bEnabled, "Enabled", "Enabled");

@@ -34,8 +34,6 @@ public:
 	// ~CDesignerEntityComponent
 
 	// IEntityPropertyGroup
-	virtual const char* GetLabel() const override { return "Cloud Properties"; }
-
 	virtual void SerializeProperties(Serialization::IArchive& archive) override
 	{
 		archive(Serialization::ResourceFilePath(m_cloudFile, "XML files|*.xml", "Libs/Clouds"), "CloudFile", "CloudFile");

@@ -25,7 +25,6 @@ private:
 	private:
 
 		// IEntityPropertyGroup
-		virtual const char* GetLabel() const override;
 		virtual void        SerializeProperties(Serialization::IArchive& archive) override;
 		// ~IEntityPropertyGroup
 	};

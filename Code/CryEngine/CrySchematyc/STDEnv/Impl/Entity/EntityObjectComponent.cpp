@@ -110,11 +110,6 @@ void CEntityObjectComponent::GetMemoryUsage(ICrySizer* pSizer) const
 	pSizer->Add(*this);
 }
 
-const char* CEntityObjectComponent::GetLabel() const
-{
-	return "Schematyc";
-}
-
 void CEntityObjectComponent::SerializeProperties(Serialization::IArchive& archive)
 {
 	if (archive.isEdit() && archive.isOutput())

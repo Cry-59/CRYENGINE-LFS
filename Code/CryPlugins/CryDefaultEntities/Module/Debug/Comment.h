@@ -23,8 +23,6 @@ public:
 	// ~ISimpleExtension
 
 	// IEntityPropertyGroup
-	virtual const char* GetLabel() const override { return "Comment Properties"; }
-
 	virtual void SerializeProperties(Serialization::IArchive& archive) override
 	{
 		archive(m_text, "Text", "Text");

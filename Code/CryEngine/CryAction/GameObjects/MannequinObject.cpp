@@ -18,11 +18,6 @@ CMannequinObject::CProperties::CProperties(CMannequinObject& owner)
 {
 }
 
-const char* CMannequinObject::CProperties::GetLabel() const
-{
-	return "Mannequin";
-}
-
 void CMannequinObject::CProperties::SerializeProperties(Serialization::IArchive& archive)
 {
 	archive(Serialization::ModelFilename(modelFilePath), "model", "Model");

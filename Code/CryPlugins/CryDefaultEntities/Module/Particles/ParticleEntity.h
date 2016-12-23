@@ -28,8 +28,6 @@ public:
 	// ~IParticleEntityComponent
 
 	// IEntityPropertyGroup
-	virtual const char* GetLabel() const override { return "ParticleEffect Properties"; }
-
 	virtual void SerializeProperties(Serialization::IArchive& archive) override
 	{
 		archive(m_bActive, "Active", "Active");
