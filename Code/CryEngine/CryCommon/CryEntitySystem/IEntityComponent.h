@@ -77,7 +77,7 @@ enum EEntityProxy
 //! Compatible to the CRYINTERFACE_DECLARE
 #define CRY_ENTITY_COMPONENT_INTERFACE(iname, iidHigh, iidLow) CRYINTERFACE_DECLARE(iname,iidHigh,iidLow)
 
-#define CRY_ENTITY_COMPONENT_CLASS(implclassname, interfaceName, cname,iidHigh,iidLow) \
+#define CRY_ENTITY_COMPONENT_CLASS(implclassname, interfaceName, cname, iidHigh, iidLow) \
 	CRYINTERFACE_BEGIN() \
 	CRYINTERFACE_ADD(IEntityComponent) \
 	CRYINTERFACE_ADD(interfaceName) \
@@ -86,7 +86,7 @@ enum EEntityProxy
 	CRY_ENTITY_COMPONENT_INTERFACE(implclassname, iidHigh, iidLow) \
 	CRYGENERATE_CLASS(implclassname, cname, iidHigh, iidLow)
 
-#define CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(implclassname,cname,iidHigh,iidLow) \
+#define CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(implclassname, cname, iidHigh, iidLow) \
 	CRYINTERFACE_BEGIN() \
 	CRYINTERFACE_ADD(IEntityComponent) \
 	CRYINTERFACE_ADD(implclassname) \

@@ -8,7 +8,7 @@ class CGeomEntity final
 	: public CDesignerEntityComponent<IGeometryEntityComponent>
 	, public IEntityPropertyGroup
 {
-	CRY_ENTITY_COMPONENT_CLASS(CGeomEntity, IGeometryEntityComponent, "GeomEntity", 0xEC0CD266A6D14774, 0xB499690BD6FB61EE);
+	CRY_ENTITY_COMPONENT_CLASS(CGeomEntity, IGeometryEntityComponent, "Geometry", 0xEC0CD266A6D14774, 0xB499690BD6FB61EE);
 
 	virtual ~CGeomEntity() {}
 

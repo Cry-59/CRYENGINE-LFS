@@ -11,7 +11,7 @@ class CAudioAreaAmbienceEntity final
 	: public CDesignerEntityComponent<>
 	, public IEntityPropertyGroup
 {
-	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CAudioAreaAmbienceEntity, "AudioAreaAmbience", 0x66F9FDBA753B4A3C, 0x977230560C65881B);
+	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CAudioAreaAmbienceEntity, "Audio Area Ambience", 0x66F9FDBA753B4A3C, 0x977230560C65881B);
 
 	virtual ~CAudioAreaAmbienceEntity() {}
 

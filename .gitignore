@@ -24,7 +24,7 @@ _WAF_/user_settings.options
 
 # Temporary directories.
 /TestResults/*
-/Solutions/*
+/[Ss]olutions*/*
 /.depproj/*
 /project.sln
 /[Ll]og[Bb]ackups
@@ -37,3 +37,10 @@ __pycache__/*
 
 # These are handled elsewhere.
 /Code/SDKs/*
+
+# Ignore Sandbox for now
+/Code/Sandbox/*
+/Tools/CryVersionSelector/build/
+/Tools/CryVersionSelector/dist/
+/Tools/CryVersionSelector/build.bat
+/Tools/CryVersionSelector/*.spec

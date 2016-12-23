@@ -10,8 +10,6 @@
 #include "EntityObjectMap.h"
 #include "Utils/SystemStateMonitor.h"
 
-CRYREGISTER_CLASS(Schematyc::CEntityObjectComponent);
-
 namespace Schematyc
 {
 CEntityObjectComponent::~CEntityObjectComponent()
@@ -112,11 +110,6 @@ void CEntityObjectComponent::GetMemoryUsage(ICrySizer* pSizer) const
 
 void CEntityObjectComponent::SerializeProperties(Serialization::IArchive& archive)
 {
-	if (archive.isEdit() && archive.isOutput())
-	{
-		DisplayDetails(archive);
-	}
-
 	if (m_pProperties)
 	{
 		m_pProperties->Serialize(archive);

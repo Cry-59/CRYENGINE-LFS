@@ -17,7 +17,12 @@ class CEntityObjectComponent final : public INetworkObject, public IEntityObject
 {
 public:
 
-	CRY_ENTITY_COMPONENT_CLASS(CEntityObjectComponent, IEntityObjectComponent, "SchematycEntityObjectComponent", 0x556382B49CE24ABC, 0xA2FB6711F095054A);
+	CRYINTERFACE_BEGIN()
+	CRYINTERFACE_ADD(IEntityComponent)
+	CRYINTERFACE_ADD(CEntityObjectComponent)
+	CRYINTERFACE_ADD(IEntityObjectComponent)
+	CRYINTERFACE_END()
+	CRY_ENTITY_COMPONENT_INTERFACE(CEntityObjectComponent, 0x556382B49CE24ABC, 0xA2FB6711F095054A)
 
 	virtual ~CEntityObjectComponent();
 

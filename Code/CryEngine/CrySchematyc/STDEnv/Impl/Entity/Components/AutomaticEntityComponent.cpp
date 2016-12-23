@@ -59,7 +59,10 @@ namespace Schematyc
 			entity.SendEvent(SEntityEvent(ENTITY_EVENT_RESET));
 		}
 
-		m_pEntityComponent->SetLocalTransform(CComponent::GetTransform().ToMatrix34());
+		if (m_pEntityComponent != nullptr)
+		{
+			m_pEntityComponent->SetLocalTransform(CComponent::GetTransform().ToMatrix34());
+		}
 	}
 
 	void CAutomaticEntityComponent::Register(IEnvRegistrar& registrar)
@@ -129,15 +132,18 @@ namespace Schematyc
 				continue;
 			}
 
+			std::shared_ptr<IEntityComponent> pTempInstance = std::static_pointer_cast<IEntityComponent>((*it)->CreateClassInstance());
+			if (pTempInstance == nullptr)
+			{
+				continue;
+			}
+
 			auto pComponent = std::make_shared<CAutomaticEntityComponentFactory>((*it)->GetClassID(), (*it)->GetName(), SCHEMATYC_SOURCE_FILE_INFO);
 			pComponent->SetAuthor(g_szCrytek);
 
-			if (std::shared_ptr<IEntityComponent> pTempInstance = std::static_pointer_cast<IEntityComponent>((*it)->CreateClassInstance()))
+			if (IEntityPropertyGroup* pProperties = pTempInstance->GetPropertyGroup())
 			{
-				if (IEntityPropertyGroup* pProperties = pTempInstance->GetPropertyGroup())
-				{
-					pComponent->SetPropertiesPointer(std::make_shared<CAutomaticEntityProperties>(pTempInstance));
-				}
+				pComponent->SetPropertiesPointer(std::make_shared<CAutomaticEntityProperties>(pTempInstance));
 			}
 
 			//pComponent->SetDescription("Automatically exposed entity component"); // TODO: Add descriptions to registered entity components

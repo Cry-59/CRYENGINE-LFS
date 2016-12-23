@@ -14,7 +14,7 @@ class CAudioAreaEntity final
 	: public CDesignerEntityComponent<>
 	, public IEntityPropertyGroup
 {
-	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CAudioAreaEntity, "AudioAreaEntity", 0xA8EC43DAC8B046A8, 0x94182C1C8C56F2D1);
+	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CAudioAreaEntity, "Audio Area", 0xA8EC43DAC8B046A8, 0x94182C1C8C56F2D1);
 
 public:
 	enum EFlowgraphInputPorts

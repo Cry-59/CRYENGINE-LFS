@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////
 class CCameraSource : public IEntityComponent
 {
-	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CCameraSource, "CameraSource", 0x19D1AD13186749A0, 0xA93EA7CA58B1F698);
+	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CCameraSource, "Camera Source", 0x19D1AD13186749A0, 0xA93EA7CA58B1F698);
 
 	virtual ~CCameraSource() {}
 
