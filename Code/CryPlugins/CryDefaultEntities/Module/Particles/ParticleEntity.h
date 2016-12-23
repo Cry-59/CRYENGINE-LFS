@@ -13,7 +13,6 @@ class CDefaultParticleEntity final
 {
 	CRY_ENTITY_COMPONENT_CLASS(CDefaultParticleEntity, IParticleEntityComponent, "ParticleEntity", 0x31B3EAD4C34442F7, 0xB794B33746D4232B);
 
-	CDefaultParticleEntity();
 	virtual ~CDefaultParticleEntity() {}
 
 public:
@@ -21,6 +20,8 @@ public:
 	virtual IEntityPropertyGroup* GetPropertyGroup() final { return this; }
 
 	virtual void OnResetState() override;
+
+	virtual void SetLocalTransform(const Matrix34& tm) override;
 	// ~CDesignerEntityComponent
 
 	// IParticleEntityComponent
@@ -41,7 +42,7 @@ public:
 	// ~IEntityPropertyGroup
 
 protected:
-	int m_particleSlot;
+	int m_particleSlot = -1;
 
 	bool m_bActive = true;
 	string m_particleEffectPath;

@@ -110,8 +110,7 @@ void CGeomEntity::OnResetState()
 {
 	if (m_model.size() > 0)
 	{
-		const int geometrySlot = 0;
-		LoadMesh(geometrySlot, m_model);
+		LoadMesh(m_geometrySlot, m_model);
 		ActivateFlowNodeOutput(eOutputPort_OnGeometryChanged, TFlowInputData(m_model));
 
 		SEntityPhysicalizeParams physicalizationParams;
@@ -135,7 +134,7 @@ void CGeomEntity::OnResetState()
 
 		if(m_animation.size() > 0)
 		{
-			if (auto* pCharacter = GetEntity()->GetCharacter(geometrySlot))
+			if (auto* pCharacter = GetEntity()->GetCharacter(m_geometrySlot))
 			{
 				CryCharAnimationParams animParams;
 				animParams.m_fPlaybackSpeed = m_animationSpeed;
@@ -148,6 +147,19 @@ void CGeomEntity::OnResetState()
 				gEnv->pLog->LogWarning("Tried to play back animation %s on entity with no character! Make sure to use a CDF or CHR geometry file!", m_animation.c_str());
 			}
 		}
+	}
+	else
+	{
+		GetEntity()->FreeSlot(m_geometrySlot);
+		m_geometrySlot = -1;
+	}
+}
+
+void CGeomEntity::SetLocalTransform(const Matrix34& tm)
+{
+	if (m_geometrySlot != -1)
+	{
+		GetEntity()->SetSlotLocalTM(m_geometrySlot, tm);
 	}
 }
 

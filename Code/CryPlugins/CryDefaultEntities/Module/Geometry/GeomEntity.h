@@ -45,6 +45,8 @@ public:
 
 	virtual void OnResetState() final;
 
+	virtual void SetLocalTransform(const Matrix34& tm) override;
+
 	virtual IEntityPropertyGroup* GetPropertyGroup() final { return this; }
 	// ~ISimpleExtension
 
@@ -82,6 +84,7 @@ public:
 protected:
 	IPhysicalEntity* m_pPhysEnt;
 
+	int m_geometrySlot = -1;
 	string m_model;
 
 	EPhysicalizationType m_physicalizationType = ePhysicalizationType_Static;

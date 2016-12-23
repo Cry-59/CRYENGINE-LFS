@@ -58,3 +58,11 @@ void CCloudEntity::OnResetState()
 
 	entity.SetCloudMovementProperties(m_cloudSlot, m_properties);
 }
+
+void CCloudEntity::SetLocalTransform(const Matrix34& tm)
+{
+	if (m_cloudSlot != -1)
+	{
+		GetEntity()->SetSlotLocalTM(m_cloudSlot, tm);
+	}
+}

@@ -18,7 +18,6 @@ class CDefaultLightEntity final
 {
 	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CDefaultLightEntity, "LightEntity", 0x61BFE88AAB1C4DFB, 0xBBD263D328C3D037);
 
-	CDefaultLightEntity();
 	virtual ~CDefaultLightEntity() {}
 
 	enum EFlowgraphInputPorts
@@ -48,6 +47,8 @@ public:
 	virtual IEntityPropertyGroup* GetPropertyGroup() final { return this; }
 
 	virtual void OnResetState() override;
+
+	virtual void SetLocalTransform(const Matrix34& tm) override;
 	// ~CDesignerEntityComponent
 
 	// IEntityPropertyGroup
@@ -130,9 +131,7 @@ public:
 	static void OnFlowgraphActivation(EntityId entityId, IFlowNode::SActivationInfo* pActInfo, const class CEntityFlowNode* pNode);
 
 protected:
-	// Specifies the entity geometry slot in which the light is loaded, -1 if not currently loaded
-	// We default to using slot 1 for this light sample, in case the user would want to put geometry into slot 0.
-	int m_lightSlot;
+	int m_lightSlot = -1;
 
 	// Light parameters, updated in the OnResetState function
 	CDLight m_light;

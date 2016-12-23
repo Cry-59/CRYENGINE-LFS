@@ -42,15 +42,15 @@ public:
 	}
 
 	// Helper for loading geometry or characters
-	void LoadMesh(int slot, const char *path)
+	void LoadMesh(int& slot, const char *path)
 	{
 		if (IsCharacterFile(path))
 		{
-			T::GetEntity()->LoadCharacter(slot, path);
+			slot = T::GetEntity()->LoadCharacter(slot, path);
 		}
 		else
 		{
-			T::GetEntity()->LoadGeometry(slot, path);
+			slot = T::GetEntity()->LoadGeometry(slot, path);
 		}
 	}
 

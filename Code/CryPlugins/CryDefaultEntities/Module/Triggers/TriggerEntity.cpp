@@ -39,11 +39,6 @@ CTriggerEntityRegistrator g_triggerEntityRegistrator;
 
 CRYREGISTER_CLASS(CTriggerEntity);
 
-CTriggerEntity::CTriggerEntity()
-	: m_bActive(true)
-{
-}
-
 void CTriggerEntity::ProcessEvent(SEntityEvent& event)
 {
 	switch (event.event)

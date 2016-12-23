@@ -17,7 +17,6 @@ class CEnvironmentProbeEntity final
 {
 	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CEnvironmentProbeEntity, "EnvironmentProbe", 0x0D3D1840D239411E, 0x873814C56CCCEE2C);
 
-	CEnvironmentProbeEntity();
 	virtual ~CEnvironmentProbeEntity() {}
 
 public:
@@ -25,6 +24,8 @@ public:
 	virtual IEntityPropertyGroup* GetPropertyGroup() final { return this; }
 
 	virtual void OnResetState() override;
+
+	virtual void SetLocalTransform(const Matrix34& tm) override;
 	// ~CDesignerEntityComponent
 
 	// IEntityPropertyGroup
@@ -60,8 +61,7 @@ protected:
 	void GetCubemapTextures(const char* path, ITexture** pSpecular, ITexture** pDiffuse);
 
 	// Specifies the entity geometry slot in which the light is loaded, -1 if not currently loaded
-	// We default to using slot 1 for this light sample, in case the user would want to put geometry into slot 0.
-	int m_lightSlot;
+	int m_lightSlot = -1;
 
 	// Light parameters, updated in the OnResetState function
 	CDLight m_light;

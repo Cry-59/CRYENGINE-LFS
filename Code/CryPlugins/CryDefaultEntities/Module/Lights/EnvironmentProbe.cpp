@@ -20,12 +20,6 @@ CProbeRegistrator g_probeRegistrator;
 
 CRYREGISTER_CLASS(CEnvironmentProbeEntity);
 
-CEnvironmentProbeEntity::CEnvironmentProbeEntity()
-// Start by setting the light slot to an invalid value by default
-	: m_lightSlot(-1)
-{
-}
-
 void CEnvironmentProbeEntity::OnResetState()
 {
 	IEntity& entity = *GetEntity();
@@ -101,7 +95,15 @@ void CEnvironmentProbeEntity::OnResetState()
 	m_light.AcquireResources();
 
 	// Load the light source into the entity
-	m_lightSlot = entity.LoadLight(1, &m_light);
+	m_lightSlot = entity.LoadLight(m_lightSlot, &m_light);
+}
+
+void CEnvironmentProbeEntity::SetLocalTransform(const Matrix34& tm)
+{
+	if (m_lightSlot != -1)
+	{
+		GetEntity()->SetSlotLocalTM(m_lightSlot, tm);
+	}
 }
 
 void CEnvironmentProbeEntity::GetCubemapTextures(const char* path, ITexture** pSpecular, ITexture** pDiffuse)

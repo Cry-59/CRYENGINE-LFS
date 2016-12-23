@@ -21,6 +21,7 @@ namespace Schematyc
 {
 	CAutomaticEntityComponent::CAutomaticEntityComponent(const CryClassID& guid)
 		: m_guid(guid)
+		, m_pEntityComponent(nullptr)
 	{
 	}
 
@@ -35,14 +36,14 @@ namespace Schematyc
 		IEntity& entity = EntityUtils::GetEntity(*this);
 		if (entity.GetComponentByTypeId(m_guid) == nullptr)
 		{
-			if (IEntityComponent* pComponent = entity.AddComponent(m_guid, std::shared_ptr<IEntityComponent>(), false))
+			if (m_pEntityComponent = entity.AddComponent(m_guid, std::shared_ptr<IEntityComponent>(), false))
 			{
 				if (auto* pPropertyGroup = static_cast<IEntityPropertyGroup*>(CComponent::GetProperties()))
 				{
 					DynArray<char> propertyBuffer;
 					gEnv->pSystem->GetArchiveHost()->SaveBinaryBuffer(propertyBuffer, Serialization::SStruct(yasli::TypeID::get<IEntityPropertyGroup>(), pPropertyGroup, sizeof(IEntityPropertyGroup), &SerializePropertiesWrapper));
 
-					gEnv->pSystem->GetArchiveHost()->LoadBinaryBuffer(Serialization::SStruct(yasli::TypeID::get<IEntityPropertyGroup>(), pComponent->GetPropertyGroup(), sizeof(IEntityPropertyGroup), &SerializePropertiesWrapper), propertyBuffer.data(), propertyBuffer.size());
+					gEnv->pSystem->GetArchiveHost()->LoadBinaryBuffer(Serialization::SStruct(yasli::TypeID::get<IEntityPropertyGroup>(), m_pEntityComponent->GetPropertyGroup(), sizeof(IEntityPropertyGroup), &SerializePropertiesWrapper), propertyBuffer.data(), propertyBuffer.size());
 				}
 			}
 		}
@@ -57,6 +58,8 @@ namespace Schematyc
 			IEntity& entity = EntityUtils::GetEntity(*this);
 			entity.SendEvent(SEntityEvent(ENTITY_EVENT_RESET));
 		}
+
+		m_pEntityComponent->SetLocalTransform(CComponent::GetTransform().ToMatrix34());
 	}
 
 	void CAutomaticEntityComponent::Register(IEnvRegistrar& registrar)

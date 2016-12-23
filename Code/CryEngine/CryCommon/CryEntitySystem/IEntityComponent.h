@@ -153,6 +153,10 @@ public:
 	//! \return true If component needs to be serialized to/from a saved game.
 	virtual bool NeedGameSerialize() { return false; };
 
+	//! Sets the local transformation of the component relative to the parent entity
+	//! The component is expected to update the local transformation of slots belonging to the component
+	virtual void SetLocalTransform(const Matrix34& tm) {}
+
 	virtual void GetMemoryUsage(ICrySizer* pSizer) const {};
 
 protected:

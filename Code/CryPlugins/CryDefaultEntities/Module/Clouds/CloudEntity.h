@@ -26,11 +26,13 @@ public:
 	virtual ~CCloudEntity() {}
 
 	// CDesignerEntityComponent
-	virtual void Initialize() final;
+	virtual void Initialize() override;
 
-	virtual IEntityPropertyGroup* GetPropertyGroup() final { return this; }
+	virtual IEntityPropertyGroup* GetPropertyGroup() override { return this; }
 
-	virtual void OnResetState() final;
+	virtual void OnResetState() override;
+
+	virtual void SetLocalTransform(const Matrix34& tm) override;
 	// ~CDesignerEntityComponent
 
 	// IEntityPropertyGroup

@@ -26,5 +26,6 @@ namespace Schematyc
 
 	private:
 		CryClassID m_guid;
+		IEntityComponent* m_pEntityComponent;
 	};
 } // Schematyc

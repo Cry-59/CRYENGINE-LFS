@@ -11,7 +11,6 @@ class CTriggerEntity final
 {
 	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CTriggerEntity, "TriggerEntity", 0x717FCF92E0484479, 0xAB8D6AF20D94AA85);
 
-	CTriggerEntity();
 	virtual ~CTriggerEntity() {}
 
 public:

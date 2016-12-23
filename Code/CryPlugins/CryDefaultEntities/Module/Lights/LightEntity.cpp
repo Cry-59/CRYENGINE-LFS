@@ -48,13 +48,6 @@ YASLI_ENUM_END()
 
 CRYREGISTER_CLASS(CDefaultLightEntity);
 
-CDefaultLightEntity::CDefaultLightEntity()
-// Start by setting the light slot to an invalid value by default
-	: m_lightSlot(-1)
-	, m_bActive(true)
-{
-}
-
 void CDefaultLightEntity::OnResetState()
 {
 	IEntity& entity = *GetEntity();
@@ -196,7 +189,15 @@ void CDefaultLightEntity::OnResetState()
 	}
 
 	// Load the light source into the entity
-	m_lightSlot = entity.LoadLight(1, &m_light);
+	m_lightSlot = entity.LoadLight(m_lightSlot, &m_light);
+}
+
+void CDefaultLightEntity::SetLocalTransform(const Matrix34& tm)
+{
+	if (m_lightSlot != -1)
+	{
+		GetEntity()->SetSlotLocalTM(m_lightSlot, tm);
+	}
 }
 
 void CDefaultLightEntity::OnFlowgraphActivation(EntityId entityId, IFlowNode::SActivationInfo* pActInfo, const class CEntityFlowNode* pNode)

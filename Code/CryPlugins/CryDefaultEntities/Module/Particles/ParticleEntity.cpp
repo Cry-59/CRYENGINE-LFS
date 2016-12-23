@@ -24,11 +24,6 @@ CParticleRegistrator g_particleRegistrator;
 
 CRYREGISTER_CLASS(CDefaultParticleEntity);
 
-CDefaultParticleEntity::CDefaultParticleEntity()
-	: m_particleSlot(-1)
-{
-}
-
 void CDefaultParticleEntity::SetParticleEffectName(cstr effectName)
 {
 	m_particleEffectPath = effectName;
@@ -52,6 +47,14 @@ void CDefaultParticleEntity::OnResetState()
 
 	if (IParticleEffect* pEffect = gEnv->pParticleManager->FindEffect(m_particleEffectPath, "ParticleEntity"))
 	{
-		m_particleSlot = entity.LoadParticleEmitter(-1, pEffect);
+		m_particleSlot = entity.LoadParticleEmitter(m_particleSlot, pEffect);
+	}
+}
+
+void CDefaultParticleEntity::SetLocalTransform(const Matrix34& tm)
+{
+	if (m_particleSlot != -1)
+	{
+		GetEntity()->SetSlotLocalTM(m_particleSlot, tm);
 	}
 }
