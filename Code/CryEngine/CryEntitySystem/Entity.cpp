@@ -1247,7 +1247,11 @@ void CEntity::SerializeProperties(Serialization::IArchive& ar)
 		// Parse component properties, if any
 		if (IEntityPropertyGroup* pProperties = componentRecord.pComponent->GetPropertyGroup())
 		{
-			if (ar.openBlock("Component", pProperties->GetLabel()))
+			size_t numFactories = 1;
+			ICryFactory* pFactory = 0;
+			gEnv->pSystem->GetCryFactoryRegistry()->IterateFactories(componentRecord.typeId, &pFactory, numFactories);
+
+			if (ar.openBlock("Component", pFactory != nullptr ? pFactory->GetName() : "Component"))
 			{
 				pProperties->SerializeProperties(ar);
 
@@ -1334,7 +1338,7 @@ IEntityComponent* CEntity::AddComponent(CryInterfaceID typeId, std::shared_ptr<I
 			CRY_ASSERT_MESSAGE(0, "AddComponent called twice with the same pointer");
 			return nullptr;
 		}
-		if (!bAllowDuplicate && componentRecord.typeId == typeId && typeId != cryiidof<ICryUnknown>())
+		if (!bAllowDuplicate && componentRecord.typeId == typeId && typeId != cryiidof<ICryUnknown>() && typeId != cryiidof<IEntityComponent>())
 		{
 			CRY_ASSERT_MESSAGE(0, "AddComponent called twice with the same interface type");
 			return nullptr;

@@ -35,7 +35,7 @@ public:
 		archive(m_bActive, "Active", "Active");
 		archive(Serialization::ParticleName(m_particleEffectPath), "ParticleEffect", "ParticleEffect");
 
-		if (archive.isInput())
+		if (archive.isInput() && m_pEntity != nullptr)
 		{
 			OnResetState();
 		}

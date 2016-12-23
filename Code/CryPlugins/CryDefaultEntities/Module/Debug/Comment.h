@@ -36,7 +36,7 @@ public:
 		archive(m_fontSize, "FontSize", "FontSize");
 		archive.doc("Maximum entity distance from player");
 
-		if (archive.isInput())
+		if (archive.isInput() && m_pEntity != nullptr)
 		{
 			OnResetState();
 		}

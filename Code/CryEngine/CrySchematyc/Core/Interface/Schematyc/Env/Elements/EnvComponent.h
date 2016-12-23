@@ -29,6 +29,10 @@ public:
 		: CEnvElementBase(Schematyc::GetTypeInfo<COMPONENT>().GetGUID(), szName, sourceFileInfo)
 	{}
 
+	inline CEnvComponent(const SGUID& guid, const char* szName, const SSourceFileInfo& sourceFileInfo)
+		: CEnvElementBase(guid, szName, sourceFileInfo)
+	{}
+
 	// IEnvElement
 
 	virtual bool IsValidScope(IEnvElement& scope) const override
@@ -125,6 +129,11 @@ public:
 		m_pProperties = Properties::MakeShared(properties);
 	}
 
+	inline void SetPropertiesPointer(const IPropertiesPtr& pProperties)
+	{
+		m_pProperties = pProperties;
+	}
+
 	template<typename TYPE> inline void SetNetworkSpawnParams(const INetworkSpawnParams& networkSpawnParams)
 	{
 		m_pNetworkSpawnParams.reset(new TYPE(networkSpawnParams));
@@ -135,7 +144,7 @@ public:
 		m_pPreviewer.reset(new TYPE(previewer));
 	}
 
-private:
+protected:
 
 	string                               m_icon;
 	EnvComponentFlags                    m_flags;

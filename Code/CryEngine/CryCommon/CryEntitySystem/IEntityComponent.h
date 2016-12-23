@@ -79,16 +79,28 @@ enum EEntityProxy
 #define CRY_ENTITY_COMPONENT_INTERFACE(iname, iidHigh, iidLow) CRYINTERFACE_DECLARE(iname,iidHigh,iidLow)
 
 #define CRY_ENTITY_COMPONENT_CLASS(implclassname, interfaceName, cname,iidHigh,iidLow) \
-	CRYGENERATE_CLASS_FROM_INTERFACE(implclassname,interfaceName,cname,iidHigh,iidLow)
+	CRYINTERFACE_BEGIN() \
+	CRYINTERFACE_ADD(IEntityComponent) \
+	CRYINTERFACE_ADD(interfaceName) \
+	CRYINTERFACE_ADD(implclassname) \
+	CRYINTERFACE_END() \
+	CRY_ENTITY_COMPONENT_INTERFACE(implclassname, iidHigh, iidLow) \
+	CRYGENERATE_CLASS(implclassname, cname, iidHigh, iidLow)
 
 #define CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(implclassname,cname,iidHigh,iidLow) \
+	CRYINTERFACE_BEGIN() \
+	CRYINTERFACE_ADD(IEntityComponent) \
+	CRYINTERFACE_ADD(implclassname) \
+	CRYINTERFACE_END() \
 	CRY_ENTITY_COMPONENT_INTERFACE(implclassname, iidHigh, iidLow) \
-	CRYGENERATE_CLASS_FROM_INTERFACE(implclassname,implclassname,cname,iidHigh,iidLow)
+	CRYGENERATE_CLASS(implclassname, cname, iidHigh, iidLow)
 
 //! Base interface for all entity components.
 struct IEntityComponent : public ICryUnknown
 {
 public:
+	CRY_ENTITY_COMPONENT_INTERFACE(IEntityComponent, 0x1C2F28E1049A4FFE, 0x8C696530296A6E50)
+
 	typedef int ComponentEventPriority;
 
 public:

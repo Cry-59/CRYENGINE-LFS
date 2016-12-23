@@ -46,7 +46,7 @@ public:
 		archive(m_minDelay, "MinDelay", "MinDelay");
 		archive(m_maxDelay, "MaxDelay", "MaxDelay");
 
-		if (archive.isInput())
+		if (archive.isInput() && m_pEntity != nullptr)
 		{
 			OnResetState();
 		}

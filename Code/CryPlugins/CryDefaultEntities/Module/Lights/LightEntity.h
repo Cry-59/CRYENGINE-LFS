@@ -112,7 +112,7 @@ public:
 			archive.closeBlock();
 		}
 
-		if (archive.isInput())
+		if (archive.isInput() && m_pEntity != nullptr)
 		{
 			OnResetState();
 		}

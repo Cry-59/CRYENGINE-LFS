@@ -29,7 +29,10 @@ CEntityComponentTriggerBounds::CEntityComponentTriggerBounds()
 //////////////////////////////////////////////////////////////////////////
 CEntityComponentTriggerBounds::~CEntityComponentTriggerBounds()
 {
-	GetTriggerSystem()->RemoveTrigger(m_pProximityTrigger);
+	if (m_pProximityTrigger != nullptr)
+	{
+		GetTriggerSystem()->RemoveTrigger(m_pProximityTrigger);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

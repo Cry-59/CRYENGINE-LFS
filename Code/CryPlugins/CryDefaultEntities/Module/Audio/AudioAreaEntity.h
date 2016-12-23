@@ -59,7 +59,7 @@ public:
 
 		archive(m_obstructionType, "SoundObstructionType", "SoundObstructionType");
 
-		if (archive.isInput())
+		if (archive.isInput() && m_pEntity != nullptr)
 		{
 			OnResetState();
 		}

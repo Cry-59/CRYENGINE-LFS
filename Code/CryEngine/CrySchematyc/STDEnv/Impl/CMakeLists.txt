@@ -49,6 +49,8 @@ add_sources("Schematyc_Uber_STDEnv_1.cpp"
 	SOURCE_GROUP "Impl\\\\Entity\\\\Actions"
 		
 	SOURCE_GROUP "Impl\\\\Entity\\\\Components"
+		"Entity/Components/AutomaticEntityComponent.cpp"
+		"Entity/Components/AutomaticEntityComponent.h"
 		"Entity/Components/EntityAudioComponent.cpp"
 		"Entity/Components/EntityAudioComponent.h"
 		"Entity/Components/EntityCameraControllerComponent.cpp"
