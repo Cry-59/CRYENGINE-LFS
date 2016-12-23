@@ -105,3 +105,11 @@ bin/win_x64/Sandbox.exe filter=lfs diff=lfs merge=lfs -text
 bin/win_x64/*.pyd filter=lfs diff=lfs merge=lfs -text
 bin/win_x64/python27.zip filter=lfs diff=lfs merge=lfs -text
 bin/win_x64/python27_d.zip filter=lfs diff=lfs merge=lfs -text
+Tools/rc/CryPhysicsRC.dll filter=lfs diff=lfs merge=lfs -text
+Tools/rc/CryXML.dll filter=lfs diff=lfs merge=lfs -text
+Tools/rc/PVRTexLib.dll filter=lfs diff=lfs merge=lfs -text
+Tools/rc/ResourceCompilerABC.dll filter=lfs diff=lfs merge=lfs -text
+Tools/rc/ResourceCompilerImage.dll filter=lfs diff=lfs merge=lfs -text
+Tools/rc/ResourceCompilerPC.dll filter=lfs diff=lfs merge=lfs -text
+Tools/rc/ResourceCompilerXML.dll filter=lfs diff=lfs merge=lfs -text
+Tools/rc/rc.exe filter=lfs diff=lfs merge=lfs -text
