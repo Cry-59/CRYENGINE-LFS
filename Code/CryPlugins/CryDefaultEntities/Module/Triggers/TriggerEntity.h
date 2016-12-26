@@ -33,6 +33,8 @@ public:
 	virtual IEntityPropertyGroup* GetPropertyGroup() final { return this; }
 
 	virtual void ProcessEvent(SEntityEvent& event) override;
+
+	virtual uint64 GetEventMask() const final { return CDesignerEntityComponent::GetEventMask() | BIT64(ENTITY_EVENT_ENTERAREA) | BIT64(ENTITY_EVENT_LEAVEAREA); }
 	// ~ISimpleExtension
 
 	// IEntityPropertyGroup

@@ -1,2 +1,0 @@
-d:\dev\puzzler\user\texturecompiler\assets\textures\lights\lens_flares\orbs_round1\orbs_round1.dds
-d:\dev\puzzler\user\texturecompiler\assets\textures\lights\lens_flares\orbs_round1\orbs_round1.dds.cryasset

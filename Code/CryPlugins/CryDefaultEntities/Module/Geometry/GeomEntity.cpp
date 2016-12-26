@@ -108,6 +108,18 @@ void CGeomEntity::SetGeometry(const char* szFilePath)
 
 void CGeomEntity::OnResetState()
 {
+	auto entityFlags = GetEntity()->GetFlags();
+	if (m_bTriggerAreas)
+	{
+		entityFlags |= ENTITY_FLAG_TRIGGER_AREAS;
+	}
+	else
+	{
+		entityFlags &= ~ENTITY_FLAG_TRIGGER_AREAS;
+	}
+
+	GetEntity()->SetFlags(entityFlags);
+
 	if (m_model.size() > 0)
 	{
 		LoadMesh(m_geometrySlot, m_model);

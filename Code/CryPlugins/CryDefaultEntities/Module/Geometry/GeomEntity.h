@@ -62,6 +62,8 @@ public:
 		archive(m_bReceiveCollisionEvents, "ReceiveCollisionEvents", "ReceiveCollisionEvents");
 		archive(m_mass, "Mass", "Mass");
 
+		archive(m_bTriggerAreas, "TriggerAreas", "Trigger Areas");
+
 		if (archive.openBlock("Animations", "Animations"))
 		{
 			archive(m_animation, "Animation", "Animation");
@@ -95,4 +97,5 @@ protected:
 	bool m_bLoopAnimation = true;
 
 	bool m_bReceiveCollisionEvents = false;
+	bool m_bTriggerAreas = false;
 };
