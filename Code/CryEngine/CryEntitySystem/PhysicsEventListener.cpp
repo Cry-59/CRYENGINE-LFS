@@ -95,6 +95,10 @@ int CPhysicsEventListener::OnPostStep(const EventPhys* pEvent)
 		pRndNode = pRenderNode;
 	}
 
+	SEntityEvent event(ENTITY_EVENT_PHYS_POSTSTEP);
+	event.fParam[0] = pPostStep->dt;
+	pCEntity->SendEvent(event);
+
 	if (pRndNode)
 	{
 		pe_params_flags pf;
