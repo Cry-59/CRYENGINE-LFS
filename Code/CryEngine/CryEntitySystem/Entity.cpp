@@ -1244,19 +1244,17 @@ void CEntity::SerializeProperties(Serialization::IArchive& ar)
 {
 	m_components.ForEach([&ar](const SEntityComponentRecord& componentRecord)
 	{
-		// Parse component properties, if any
-		if (IEntityPropertyGroup* pProperties = componentRecord.pComponent->GetPropertyGroup())
-		{
-			size_t numFactories = 1;
-			ICryFactory* pFactory = 0;
-			gEnv->pSystem->GetCryFactoryRegistry()->IterateFactories(componentRecord.typeId, &pFactory, numFactories);
+		IEntityPropertyGroup* pProperties = componentRecord.pComponent->GetPropertyGroup();
 
-			if (ar.openBlock("Component", pFactory != nullptr ? pFactory->GetName() : "Component"))
+		if ((componentRecord.name.size() > 0 || pProperties != nullptr) && ar.openBlock("Component", componentRecord.name))
+		{
+			// Parse component properties, if any
+			if (pProperties != nullptr)
 			{
 				pProperties->SerializeProperties(ar);
-
-				ar.closeBlock();
 			}
+
+			ar.closeBlock();
 		}
 	});
 }
@@ -1354,6 +1352,12 @@ IEntityComponent* CEntity::AddComponent(CryInterfaceID typeId, std::shared_ptr<I
 	componentRecord.registeredEventsMask = pComponent->GetEventMask();
 	componentRecord.proxyType = (int)pComponent->GetProxyType();
 	componentRecord.eventPriority = pComponent->GetEventPriority();
+
+	size_t numFactories = 1;
+	ICryFactory* pFactory = 0;
+	gEnv->pSystem->GetCryFactoryRegistry()->IterateFactories(componentRecord.typeId, &pFactory, numFactories);
+
+	componentRecord.name = pFactory != nullptr ? pFactory->GetName() : "";
 
 	if (componentRecord.registeredEventsMask & BIT64(ENTITY_EVENT_RENDER_VISIBILITY_CHANGE))
 	{
