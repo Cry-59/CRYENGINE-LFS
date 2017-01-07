@@ -179,14 +179,8 @@ int CPhysicalPlaceholder::AddGeometry(phys_geometry *pgeom, pe_geomparams* param
 void CPhysicalPlaceholder::RemoveGeometry(int id, int bThreadSafe) { 
 	return GetEntity()->RemoveGeometry(id,bThreadSafe); 
 }
-int CPhysicalPlaceholder::GetStateSnapshot(class CStream &stm, float time_back, int flags) { 
-	return GetEntity()->GetStateSnapshot(stm,time_back,flags); 
-}
 int CPhysicalPlaceholder::GetStateSnapshot(TSerialize ser, float time_back, int flags) {
 	return GetEntity()->GetStateSnapshot(ser,time_back,flags);
-}
-int CPhysicalPlaceholder::SetStateFromSnapshot(class CStream &stm, int flags) { 
-	return GetEntity()->SetStateFromSnapshot(stm,flags); 
 }
 int CPhysicalPlaceholder::SetStateFromSnapshot(TSerialize ser, int flags) {
 	return GetEntity()->SetStateFromSnapshot(ser,flags);
@@ -196,15 +190,6 @@ int CPhysicalPlaceholder::SetStateFromTypedSnapshot(TSerialize ser, int type, in
 }
 int CPhysicalPlaceholder::PostSetStateFromSnapshot() { 
 	return GetEntity()->PostSetStateFromSnapshot(); 
-}
-int CPhysicalPlaceholder::GetStateSnapshotTxt(char *txtbuf,int szbuf, float time_back) {
-	return GetEntity()->GetStateSnapshotTxt(txtbuf,szbuf,time_back);
-}
-void CPhysicalPlaceholder::SetStateFromSnapshotTxt(const char *txtbuf,int szbuf) {
-	GetEntity()->SetStateFromSnapshotTxt(txtbuf,szbuf);
-}
-unsigned int CPhysicalPlaceholder::GetStateChecksum() {
-	return GetEntity()->GetStateChecksum();
 }
 void CPhysicalPlaceholder::SetNetworkAuthority(int authoritive, int paused) {
 	return GetEntity()->SetNetworkAuthority(authoritive, paused);

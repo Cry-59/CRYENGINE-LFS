@@ -115,9 +115,7 @@ public:
 	virtual void DrawHelperInformation(IPhysRenderer *pRenderer, int flags);
 
 	enum snapver { SNAPSHOT_VERSION = 2 };
-	virtual int GetStateSnapshot(class CStream &stm, float time_back=0, int flags=0);
 	virtual int GetStateSnapshot(TSerialize ser, float time_back=0, int flags=0);
-	virtual int SetStateFromSnapshot(class CStream &stm, int flags=0);
 	virtual int SetStateFromSnapshot(TSerialize ser, int flags=0);
 
 	virtual void GetMemoryStatistics(ICrySizer *pSizer) const;

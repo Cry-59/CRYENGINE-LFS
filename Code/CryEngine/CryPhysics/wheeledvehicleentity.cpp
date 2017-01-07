@@ -1048,16 +1048,6 @@ float CWheeledVehicleEntity::ComputeDrivingTorque(float time_interval)
 	return m_drivingTorque = T;
 }
 
-
-/*const int NH=256;
-CWheeledVehicleEntity *g_whist[NH],*g_whist2[NH];
-CStream g_wsnap[NH];
-entity_contact *g_conthist[NH],*g_conthist2[NH];
-masktype *g_collhist[NH],*g_collhist2[NH];
-int g_iwhist=0,g_checksum[NH],g_ncompare=0,g_bstartcompare=0,g_histinit=0,g_iwhist0=-1;
-int g_forcepedal = 0;*/
-
-
 void CWheeledVehicleEntity::AddAdditionalImpulses(float time_interval)
 {
 	int i,j,/*idx[NMAXWHEELS],nContacts,*/bAllSlip=1,iDriver[2],bContact[2],iside;//,i1,j1,nfr=0,nfr1,slide[16];
@@ -1572,131 +1562,7 @@ int CWheeledVehicleEntity::Update(float time_interval, float damping)
 		m_wengine = CompressFloat(m_wengine,200.0f,14);
 	}*/
 
-	/*if (!g_histinit) {
-		g_histinit=1; int i;
-		for(i=0;i<NH;i++) { g_whist[i] = new CWheeledVehicleEntity(m_pWorld);	g_whist2[i] = new CWheeledVehicleEntity(m_pWorld); }
-		for(i=0;i<NH;i++) { g_conthist[i] = new entity_contact[64];	g_conthist2[i] = new entity_contact[64]; }
-		for(i=0;i<NH;i++) { g_collhist[i] = new masktype[64];	g_collhist2[i] = new masktype[64]; }
-	}
-	if (g_ncompare) {
-		if (g_checksum[g_iwhist]!=GetStateChecksum())
-		g_iwhist = g_iwhist;
-	} else {
-		memcpy(g_whist[g_iwhist],this,sizeof(*this));
-		memcpy(g_conthist[g_iwhist],m_pContacts,m_nContactsAlloc*sizeof(entity_contact));
-		memcpy(g_collhist[g_iwhist],m_pColliderContacts,m_nCollidersAlloc*sizeof(masktype));
-		g_wsnap[g_iwhist].Reset();
-		GetStateSnapshot(g_wsnap[g_iwhist]);
-		g_checksum[g_iwhist] = GetStateChecksum();
-	}
-	memcpy(g_whist2[g_iwhist],this,sizeof(*this));
-	memcpy(g_conthist2[g_iwhist],m_pContacts,m_nContactsAlloc*sizeof(entity_contact));
-	memcpy(g_collhist2[g_iwhist],m_pColliderContacts,m_nCollidersAlloc*sizeof(masktype));
-	g_iwhist = g_iwhist+1 & NH-1;
-	if (g_ncompare && ++g_ncompare>NH-2) g_ncompare=0;
-	if (g_bstartcompare) {
-		if (g_iwhist0>=0)	g_iwhist=g_iwhist0;
-		else g_iwhist0=g_iwhist;
-		g_ncompare = 1; g_bstartcompare=0;
-		g_wsnap[g_iwhist].Seek(0);
-		SetStateFromSnapshot(g_wsnap[g_iwhist]);
-		PostSetStateFromSnapshot();
-		g_iwhist = g_iwhist+1 & NH-1;
-	}*/
-
 	return (m_bAwake^1) | isneg(m_timeStepFull-m_timeStepPerformed-0.001f) | iszero(m_enginePedal+(~m_flags & pef_invisible));
-}
-
-
-int CWheeledVehicleEntity::GetStateSnapshot(CStream &stm, float time_back, int flags)
-{
-	CRigidEntity::GetStateSnapshot(stm,time_back,flags);
-
-	if (!(flags & ssf_checksum_only)) {
-		if (m_pWorld->m_vars.bMultiplayer) {
-			for(int i=0;i<m_nParts-m_nHullParts;i++)
-				WriteCompressedFloat(stm, m_susp[i].w, 200.0f,14);
-			WriteCompressedFloat(stm, m_enginePedal, 1.0f,12);
-			WriteCompressedFloat(stm, m_steer, 1.0f,12);
-			WriteCompressedFloat(stm, m_clutch, 1.0f,12);
-			WriteCompressedFloat(stm, m_wengine, 200.0f,14);
-		} else {
-			for(int i=0;i<m_nParts-m_nHullParts;i++)
-				stm.Write(m_susp[i].w);
-			stm.Write(m_enginePedal);
-			stm.Write(m_steer);
-			stm.Write(m_clutch);
-			stm.Write(m_wengine);
-		}
-		stm.Write(m_bHandBrake!=0);
-		if (1/*m_iIntegrationType*/) {
-			stm.Write(true);
-			//stm.Write(m_Ffriction);
-			//stm.Write(m_Tfriction);
-		} else stm.Write(false);
-		if (m_body.Fcollision.len2()+m_body.Tcollision.len2()>0) {
-			stm.Write(true);
-			stm.Write(m_body.Fcollision);
-			stm.Write(m_body.Tcollision);
-		}	else stm.Write(false);
-		stm.Write(m_bHasContacts!=0);
-		stm.WriteNumberInBits(m_iCurGear,3);
-	}
-
-	return 1;
-}
-
-int CWheeledVehicleEntity::SetStateFromSnapshot(CStream &stm, int flags)
-{
-	int res = CRigidEntity::SetStateFromSnapshot(stm,flags);
-	if (res && res!=2) {
-		bool bnz; int gear;
-		if (!(flags & ssf_no_update)) {
-			pe_action_drive ad;
-			if (m_pWorld->m_vars.bMultiplayer) {
-				for(int i=0;i<m_nParts-m_nHullParts;i++)
-					ReadCompressedFloat(stm, m_susp[i].w, 200.0f,14);
-				ReadCompressedFloat(stm, ad.pedal, 1.0f,12);
-				ReadCompressedFloat(stm, ad.steer, 1.0f,12);
-				ReadCompressedFloat(stm, m_clutch, 1.0f,12);
-				ReadCompressedFloat(stm, m_wengine, 200.0f,14);
-			} else {
-				for(int i=0;i<m_nParts-m_nHullParts;i++)
-					stm.Read(m_susp[i].w);
-				stm.Read(ad.pedal);
-				stm.Read(ad.steer);
-				stm.Read(m_clutch);
-				stm.Read(m_wengine);
-			}
-			stm.Read(bnz); ad.bHandBrake = bnz ? 1:0;
-			Action(&ad);
-
-			stm.Read(bnz); if (bnz) {
-				//stm.Read(m_Ffriction);
-				//stm.Read(m_Tfriction);
-			}
-			stm.Read(bnz); if (bnz) {
-				stm.Read(m_body.Fcollision);
-				stm.Read(m_body.Tcollision);
-			}	else {
-				m_body.Fcollision.zero();
-				m_body.Tcollision.zero();
-			}
-			stm.Read(bnz); m_bHasContacts = bnz ? 1:0;
-			stm.ReadNumberInBits(gear,3);
-			m_iCurGear = gear;
-		} else {
-			stm.Seek(stm.GetReadPos()+(m_pWorld->m_vars.bMultiplayer ? 
-				(m_nParts-m_nHullParts)*14+12*3+14+1 : (m_nParts-m_nHullParts)*sizeof(float)*8+4*sizeof(float)*8+1));
-			stm.Read(bnz); if (bnz)
-				stm.Seek(stm.GetReadPos()+2*sizeof(Vec3)*8);
-			stm.Read(bnz); if (bnz)
-				stm.Seek(stm.GetReadPos()+2*sizeof(Vec3)*8);
-			stm.Seek(stm.GetReadPos()+4);
-		}
-	}
-
-	return res;
 }
 
 void SWheeledVehicleEntityNetSerialize::Serialize( TSerialize ser, int nSusp )

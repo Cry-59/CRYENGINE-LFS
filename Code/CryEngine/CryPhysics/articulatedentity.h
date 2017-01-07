@@ -126,8 +126,6 @@ class CArticulatedEntity : public CRigidEntity {
 	virtual void GetMemoryStatistics(ICrySizer *pSizer) const;
 
 	enum snapver { SNAPSHOT_VERSION = 6 };
-	virtual int GetStateSnapshot(CStream &stm, float time_back=0,int flags=0);
-	virtual int SetStateFromSnapshot(CStream &stm, int flags);
 	virtual int GetStateSnapshot(TSerialize ser, float time_back=0, int flags=0);
 	virtual int SetStateFromSnapshot(TSerialize ser, int flags);
 

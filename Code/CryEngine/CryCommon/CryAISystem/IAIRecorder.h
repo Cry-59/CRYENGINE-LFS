@@ -70,8 +70,6 @@ struct IAIRecorder
 	// </interfuscator:shuffle>
 };
 
-class CStream;
-
 struct IAIDebugRecord;
 
 struct IAIRecordable

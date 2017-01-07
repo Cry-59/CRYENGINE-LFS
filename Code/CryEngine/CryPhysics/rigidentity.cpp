@@ -3530,25 +3530,6 @@ int CRigidEntity::Update(float time_interval, float damping)
 	m_bStable = 0;
 	(m_body.flags &= ~rb_RK4) |= rb_RK4*isneg(m_nColliders-1);
 
-	//doneupdate:
-	/*if (m_pWorld->m_vars.bMultiplayer) {
-		//m_pos = CompressPos(m_pos);
-		//m_body.pos = m_pos+m_qrot*m_body.offsfb;
-		m_qNew = CompressQuat(m_qrot);
-		Matrix33 R = Matrix33(m_body.q = m_qrot*!m_body.qfb);
-		m_body.v = CompressVel(m_body.v,50.0f);
-		m_body.w = CompressVel(m_body.w,20.0f);
-		m_body.P = m_body.v*m_body.M;
-		m_body.L = m_body.q*(m_body.Ibody*(m_body.w*m_body.q));
-		m_body.Iinv = R*m_body.Ibody_inv*R.T();
-		ComputeBBoxRE(partCoordTmp);
-		UpdatePosition(m_pWorld->RepositionEntity(this,1,m_BBoxNew));
-
-		m_iLastChecksum = m_iLastChecksum+1 & NCHECKSUMS-1;
-		m_checksums[m_iLastChecksum].iPhysTime = m_pWorld->m_iTimePhysics;
-		m_checksums[m_iLastChecksum].checksum = GetStateChecksum();
-	}*/
-
 	return (m_bAwake^1) | isneg(m_timeStepFull-m_timeStepPerformed-0.001f) | m_pWorld->m_threadData[iCaller].bGroupInvisible;
 }
 
@@ -3620,42 +3601,6 @@ void CRigidEntity::UpdateStateFromNetwork() {
 	}
 }
 #endif
-
-int CRigidEntity::GetStateSnapshot(CStream &stm, float time_back, int flags)
-{
-	if (flags & ssf_checksum_only) {
-		stm.Write(false);
-		stm.Write(GetStateChecksum());
-	}	else {
-		stm.Write(true);
-		stm.WriteNumberInBits(GetSnapshotVersion(),4);
-		stm.Write(m_pos);
-		if (m_pWorld->m_vars.bMultiplayer) {
-			WriteCompressedQuat(stm,m_qrot);
-			WriteCompressedVel(stm,m_body.v,50.0f);
-			WriteCompressedVel(stm,m_body.w,20.0f);
-		} else {
-			stm.WriteBits((uint8*)&m_qrot,sizeof(m_qrot)*8);
-			if (m_body.Minv>0) {
-				stm.Write(m_body.P);
-				stm.Write(m_body.L);	
-			} else {
-				stm.Write(m_body.v);
-				stm.Write(m_body.w);
-			}
-		}
-		if (m_Pext.len2()+m_Lext.len2()>0) {
-			stm.Write(true);
-			stm.Write(m_Pext);
-			stm.Write(m_Lext);
-		} else stm.Write(false);
-		stm.Write(m_bAwake!=0);
-		stm.Write(m_iSimClass>1);
-		WriteContacts(stm,flags);
-	}
-
-	return 1;
-}
 
 void SRigidEntityNetSerialize::Serialize( TSerialize ser )
 {
@@ -3777,136 +3722,6 @@ int CRigidEntity::GetStateSnapshot( TSerialize ser, float time_back, int flags )
 			}
 			ser.EndGroup();
 		}
-	}
-
-	return 1;
-}
-
-int CRigidEntity::WriteContacts(CStream &stm,int flags)
-{
-	int i;
-	entity_contact *pContact;
-
-	WritePacked(stm, m_nColliders);
-	for(i=0; i<m_nColliders; i++) {
-		WritePacked(stm, m_pWorld->GetPhysicalEntityId(m_pColliders[i])+1);
-		if (m_pColliderContacts[i]) {
-			for(pContact=m_pColliderContacts[i];;pContact=pContact->next)
-				if (pContact->flags & contact_last) break;
-			for(;;pContact=pContact->prev) {
-				stm.Write(true);
-				//stm.Write(pContact->ptloc[0]);
-				//stm.Write(pContact->ptloc[1]);
-				stm.Write(pContact->nloc);
-				WritePacked(stm, pContact->ipart[0]);
-				WritePacked(stm, pContact->ipart[1]);
-				WritePacked(stm, (int)pContact->iConstraint);
-				WritePacked(stm, (int)pContact->iNormal);
-				stm.Write((pContact->flags & contact_2b_verified)!=0);
-				stm.Write(false);//pContact->vsep>0);
-				stm.Write(pContact->penetration);
-				if (pContact==m_pColliderContacts[i]) break;
-			}
-		}
-		stm.Write(false);
-	}
-
-	return 1;
-}
-
-int CRigidEntity::SetStateFromSnapshot(CStream &stm, int flags)
-{
-	bool bnz;
-	int ver=0;
-	int iMiddle,iBound[2]={ m_iLastChecksum+1-NCHECKSUMS,m_iLastChecksum+1 };
-	unsigned int checksum,checksum_hist;
-	coord_block_BBox partCoordTmp[2];
-	if (m_pWorld->m_iTimeSnapshot[2]>=m_checksums[iBound[0]&NCHECKSUMS-1].iPhysTime &&
-			m_pWorld->m_iTimeSnapshot[2]<=m_checksums[iBound[1]-1&NCHECKSUMS-1].iPhysTime)
-	{
-		do {
-			iMiddle = iBound[0]+iBound[1]>>1;
-			iBound[isneg(m_pWorld->m_iTimeSnapshot[2]-m_checksums[iMiddle&NCHECKSUMS-1].iPhysTime)] = iMiddle;
-		} while(iBound[1]>iBound[0]+1);
-		checksum_hist = m_checksums[iBound[0]&NCHECKSUMS-1].checksum;
-	} else
-		checksum_hist = GetStateChecksum();
-
-#ifdef _DEBUG
-	if (m_pWorld->m_iTimeSnapshot[2]!=0) {
-		if (m_bAwake && m_checksums[iBound[0]&NCHECKSUMS-1].iPhysTime!=m_pWorld->m_iTimeSnapshot[2])
-			m_pWorld->m_pLog->Log("Rigid Entity: time not in list (%d, bounds %d-%d) (id %d)", m_pWorld->m_iTimeSnapshot[2],
-				m_checksums[iBound[0]&NCHECKSUMS-1].iPhysTime,m_checksums[iBound[1]&NCHECKSUMS-1].iPhysTime,m_id);
-		if(m_bAwake && (m_checksums[iBound[0]-1&NCHECKSUMS-1].iPhysTime==m_checksums[iBound[0]&NCHECKSUMS-1].iPhysTime ||
-			 m_checksums[iBound[0]+1&NCHECKSUMS-1].iPhysTime==m_checksums[iBound[0]&NCHECKSUMS-1].iPhysTime))
-			m_pWorld->m_pLog->Log("Rigid Entity: 2 same times in history (id %d)",m_id);
-	}
-#endif
-
-	stm.Read(bnz);
-	if (!bnz) {
-		stm.Read(checksum);
-		m_flags |= ref_checksum_received;
-		if (!(flags & ssf_no_update)) {
-			m_flags &= ~ref_checksum_outofsync;
-			m_flags |= ref_checksum_outofsync & ~-iszero((int)(checksum-checksum_hist));
-			//if (m_flags & pef_checksum_outofsync)
-			//	m_pWorld->m_pLog->Log("Rigid Entity %s out of sync (id %d)",
-			//		m_pWorld->m_pPhysicsStreamer->GetForeignName(m_pForeignData,m_iForeignData,m_iForeignFlags), m_id);
-		}
-		return 2;
-	}	else {
-		m_flags = m_flags & ~ref_checksum_received;
-		stm.ReadNumberInBits(ver,4);
-		if (ver!=GetSnapshotVersion())
-			return 0;
-
-		if (!(flags & ssf_no_update)) {
-			m_flags &= ~ref_checksum_outofsync;
-			stm.Read(m_posNew);
-			if (m_pWorld->m_vars.bMultiplayer) {
-				ReadCompressedQuat(stm,m_qNew);
-				m_body.pos = m_pos+m_qrot*m_body.offsfb;
-				Matrix33 R = Matrix33(m_body.q = m_qrot*!m_body.qfb);
-				ReadCompressedVel(stm,m_body.v,50.0f);
-				ReadCompressedVel(stm,m_body.w,20.0f);
-				m_body.P = m_body.v*m_body.M;
-				m_body.L = m_body.q*(m_body.Ibody*(m_body.w*m_body.q));
-				m_body.Iinv = R*m_body.Ibody_inv*R.T();
-			} else {
-				stm.ReadBits((uint8*)&m_qNew,sizeof(m_qrot)*8);
-				if (m_body.Minv>0) {
-					stm.Read(m_body.P);
-					stm.Read(m_body.L);
-				} else {
-					stm.Read(m_body.v);
-					stm.Read(m_body.w);
-				}
-				m_body.pos = m_pos+m_qrot*m_body.offsfb;
-				m_body.q = m_qrot*!m_body.qfb;
-				m_body.UpdateState();
-			}
-			stm.Read(bnz); if (bnz) {
-				stm.Read(m_Pext);
-				stm.Read(m_Lext);
-			}
-			stm.Read(bnz); m_bAwake = bnz ? 1:0;
-			stm.Read(bnz); m_iSimClass = bnz ? 2:1;
-			ComputeBBoxRE(partCoordTmp);
-			UpdatePosition(m_pWorld->RepositionEntity(this,1,m_BBoxNew));
-
-			m_iLastChecksum = iBound[0]+sgn(m_pWorld->m_iTimeSnapshot[2]-m_checksums[iBound[0]&NCHECKSUMS-1].iPhysTime) & NCHECKSUMS-1;
-			m_checksums[m_iLastChecksum].iPhysTime = m_pWorld->m_iTimeSnapshot[2];
-			m_checksums[m_iLastChecksum].checksum = GetStateChecksum();
-		} else {
-			stm.Seek(stm.GetReadPos()+sizeof(Vec3)*8 + 
-				(m_pWorld->m_vars.bMultiplayer ? CMP_QUAT_SZ+CMP_VEL_SZ*2 : (sizeof(quaternionf)+2*sizeof(Vec3))*8));
-			stm.Read(bnz); if (bnz)
-				stm.Seek(stm.GetReadPos()+2*sizeof(Vec3)*8);
-			stm.Seek(stm.GetReadPos()+2);
-		}
-
-		ReadContacts(stm, flags);
 	}
 
 	return 1;
@@ -4242,104 +4057,6 @@ int CRigidEntity::SetStateFromSnapshot( TSerialize ser, int flags )
 	return 1;
 }
 
-int CRigidEntity::ReadContacts(CStream &stm, int flags)
-{
-	int i,j,id; bool bnz;
-	pe_status_id si;
-	int idPrevColliders[16],nPrevColliders=0;
-	masktype iPrevConstraints[16];
-	entity_contact *pContact,*pContactNext;
-
-	if (!(flags & ssf_no_update)) {
-		for(i=0;i<m_nColliders;i++) {
-			if (m_pColliderConstraints[i] && nPrevColliders<16) {
-				idPrevColliders[nPrevColliders] = m_pWorld->GetPhysicalEntityId(m_pColliders[i]);
-				iPrevConstraints[nPrevColliders++] = m_pColliderConstraints[i];
-			}
-			if (m_pColliders[i]!=this) {
-				m_pColliders[i]->RemoveColliderMono(this);
-				m_pColliders[i]->Release();
-			}
-		}
-
-		ReadPacked(stm,m_nColliders);
-		if (m_nCollidersAlloc<m_nColliders) {
-			if (m_pColliders) delete[] m_pColliders;
-			if (m_pColliderContacts) delete[] m_pColliderContacts;
-			m_nCollidersAlloc = (m_nColliders-1&~7)+8;
-			m_pColliders = new CPhysicalEntity*[m_nCollidersAlloc];
-			m_pColliderContacts = new entity_contact*[m_nCollidersAlloc];
-			memset(m_pColliderConstraints = new masktype[m_nCollidersAlloc],0,m_nCollidersAlloc*sizeof(m_pColliderConstraints[0]));
-		}
-		for(pContact=m_pContactStart; pContact!=CONTACT_END(m_pContactStart); pContact=pContactNext) {
-			pContactNext=pContact; m_pWorld->FreeContact(pContact);
-		}
-
-		for(i=0;i<m_nColliders;i++) {
-			ReadPacked(stm,id); --id;
-			m_pColliders[i] = (CPhysicalEntity*)(UINT_PTR)id;
-			m_pColliderConstraints[i] = 0;
-			while(true) {
-				stm.Read(bnz);
-				if (!bnz) break;
-				pContact = m_pWorld->AllocContact();
-				AttachContact(pContact,i,m_pColliders[i]);
-
-				//stm.Read(pContact->ptloc[0]);
-				//stm.Read(pContact->ptloc[1]);
-				stm.Read(pContact->nloc);
-				ReadPacked(stm, j); pContact->ipart[0]=j;
-				ReadPacked(stm, j); pContact->ipart[1]=j;
-				ReadPacked(stm, j); pContact->iConstraint=j;
-				int iNormal; ReadPacked(stm,iNormal); pContact->iNormal=iNormal;
-				stm.Read(bnz); pContact->flags = bnz ? contact_2b_verified : 0;
-				stm.Read(bnz); //pContact->vsep = bnz ? m_pWorld->m_vars.minSeparationSpeed : 0;
-				stm.Read(pContact->penetration);
-
-				pContact->pent[0] = this;
-				pContact->pent[1] = (CPhysicalEntity*)(UINT_PTR)id;
-				pContact->pbody[0] = pContact->pent[0]->GetRigidBody(pContact->ipart[0]);
-				si.ipart = pContact->ipart[0];
-				//si.iPrim = pContact->iPrim[0];
-				//si.iFeature = pContact->iFeature[0];
-				pContact->pent[0]->GetStatus(&si);
-				pContact->id0 = si.id;
-				//pContact->penetration = 0;
-				//pContact->pt[0] = pContact->pt[1] = 
-				//	pContact->pbody[0]->q*pContact->ptloc[0]+pContact->pbody[0]->pos;
-			}
-		}
-		for(i=0;i<nPrevColliders;i++)	{
-			for(j=0;j<m_nColliders && (int)(INT_PTR)m_pColliders[j]!=idPrevColliders[i];j++);
-			if (j<m_nColliders)
-				m_pColliderConstraints[j] = iPrevConstraints[i];
-		}
-		m_bJustLoaded = m_nColliders;
-
-		m_nColliders = 0; // so that no1 thinks we have colliders until postload is called
-		if (!m_nParts && m_bJustLoaded) {
-			m_pWorld->m_pLog->LogError("Error: Rigid Body (@%.1f,%.1f,%.1f; id %d) lost its geometry after loading",m_pos.x,m_pos.y,m_pos.z,m_id);
-			m_bJustLoaded = 0;
-		}
-	} else {
-		int nColliders;
-		ReadPacked(stm,nColliders); ReadPacked(stm,id);
-		for(i=0;i<nColliders;i++) {
-			ReadPacked(stm,id); 
-			while(true) {
-				stm.Read(bnz); if (!bnz) break;
-				stm.Seek(stm.GetReadPos()+3*sizeof(Vec3)*8);
-				ReadPacked(stm,id);ReadPacked(stm,id);ReadPacked(stm,id);ReadPacked(stm,id);
-				ReadPacked(stm,id);ReadPacked(stm,id);ReadPacked(stm,id);
-				stm.Seek(stm.GetReadPos()+2+sizeof(float)*8);
-			}
-		}
-	}
-
-	return 1;
-}
-
-
 int CRigidEntity::PostSetStateFromSnapshot()
 {
 	if (m_bJustLoaded) {
@@ -4397,17 +4114,6 @@ int CRigidEntity::PostSetStateFromSnapshot()
 	}
 	return 1;
 }
-
-
-unsigned int CRigidEntity::GetStateChecksum()
-{
-	return //*(unsigned int*)&m_testval;
-		float2int(m_pos.x*1024)^float2int(m_pos.y*1024)^float2int(m_pos.z*1024)^
-		float2int(m_qrot.v.x*1024)^float2int(m_qrot.v.y*1024)^float2int(m_qrot.v.z*1024)^
-		float2int(m_body.v.x*1024)^float2int(m_body.v.y*1024)^float2int(m_body.v.z*1024)^
-		float2int(m_body.w.x*1024)^float2int(m_body.w.y*1024)^float2int(m_body.w.z*1024);
-}
-
 
 void CRigidEntity::ApplyBuoyancy(float time_interval,const Vec3& gravity,pe_params_buoyancy *pb,int nBuoys)
 {

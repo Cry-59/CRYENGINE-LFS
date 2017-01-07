@@ -127,15 +127,10 @@ class CRigidEntity : public CPhysicalEntity {
 
 	enum snapver { SNAPSHOT_VERSION = 9 };
 	virtual int GetSnapshotVersion() { return SNAPSHOT_VERSION; }
-	virtual int GetStateSnapshot(class CStream &stm, float time_back=0, int flags=0);
 	virtual int GetStateSnapshot(TSerialize ser, float time_back=0, int flags=0);
-	virtual int SetStateFromSnapshot(class CStream &stm, int flags=0);
 	virtual int SetStateFromSnapshot(TSerialize ser, int flags);
 	virtual int PostSetStateFromSnapshot();
-	virtual unsigned int GetStateChecksum();
 	virtual void SetNetworkAuthority(int authoritive, int paused);
-	int WriteContacts(CStream &stm,int flags);
-	int ReadContacts(CStream &stm,int flags);
 
 	virtual void StartStep(float time_interval);
 	virtual float GetMaxTimeStep(float time_interval);

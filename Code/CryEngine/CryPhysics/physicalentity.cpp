@@ -1922,42 +1922,6 @@ struct SMemSerializer : ISerialize {
 	int pos,size;
 };
 
-int CPhysicalEntity::GetStateSnapshotTxt(char *txtbuf,int szbuf, float time_back) 
-{
-	const int version = 0;
-	SMemSerializer mser;
-	if (txtbuf)	{
-		for(int i=0,j=version,j10; i<4; i++,j=j10) 
-			j10=j/10, txtbuf[3-i]=j-(j10*10)+'0';
-		txtbuf += 4;
-	}
-	if (time_back<0) {
-		if (txtbuf) *txtbuf++='~'; szbuf--;
-		CPhysicalEntity::GetStateSnapshot(TSerialize(&mser));
-	} else
-		GetStateSnapshot(TSerialize(&mser));
-	return (txtbuf ? bin2ascii((unsigned char*)mser.buf,mser.pos,(unsigned char*)txtbuf) : (mser.pos*4)/3+2)+4;
-}
-
-void CPhysicalEntity::SetStateFromSnapshotTxt(const char *txtbuf,int szin)
-{
-	int szbuf=szin, version=0;
-	for(int i=0; i<4; i++)
-		version = version*10 + *txtbuf++-'0';
-	const unsigned char *txtbuf1 = (const unsigned char*)txtbuf+(*txtbuf=='~' ? 1:0);
-	char *buf = new char[szbuf];
-	SMemSerializer mser(buf);
-	while (!ascii2bin(txtbuf1,szbuf,(unsigned char*)buf)) {
-		delete[] buf; buf=mser.buf=new char[szbuf*=2];
-	}
-	if (*txtbuf=='~') 
-		CPhysicalEntity::SetStateFromSnapshot(TSerialize(&mser));
-	else
-		SetStateFromSnapshot(TSerialize(&mser));
-	delete[] buf;
-}
-
-
 inline void FillGeomParams(pe_geomparams &dst, geom &src)
 {
 	dst.flags = (src.flags|geom_can_modify)&~(geom_invalid|geom_removed|geom_constraint_on_break);

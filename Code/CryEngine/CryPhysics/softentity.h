@@ -97,8 +97,6 @@ class CSoftEntity : public CPhysicalEntity {
 	void AttachPoints(pe_action_attach_points *action, CPhysicalEntity *pent,int ipart, float rvtxmass,float vtxmass, int bAttached, const Vec3 &offs,const quaternionf &q);
 
 	enum snapver { SNAPSHOT_VERSION = 10 };
-	virtual int GetStateSnapshot(CStream &stm, float time_back=0,int flags=0);
-	virtual int SetStateFromSnapshot(CStream &stm, int flags);
 	virtual int GetStateSnapshot(TSerialize ser, float time_back=0, int flags=0);
 	virtual int SetStateFromSnapshot(TSerialize ser, int flags=0);
 

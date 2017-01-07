@@ -11,7 +11,6 @@ typedef unsigned int EntityId;          //!< Unique identifier for each entity i
 struct IPhysicalEntity;
 struct IEntityClass;
 struct IEntityArchetype;
-class CStream;
 class CCamera;
 struct EntityCloneState;
 struct IEntity;

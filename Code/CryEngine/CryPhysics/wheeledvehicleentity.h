@@ -85,9 +85,7 @@ class CWheeledVehicleEntity : public CRigidEntity {
 
 	enum snapver { SNAPSHOT_VERSION = 1 };
 	virtual int GetSnapshotVersion() { return SNAPSHOT_VERSION; }
-	virtual int GetStateSnapshot(class CStream &stm, float time_back=0, int flags=0);
 	virtual int GetStateSnapshot(TSerialize ser, float time_back=0, int flags=0);
-	virtual int SetStateFromSnapshot(class CStream &stm, int flags=0);
 	virtual int SetStateFromSnapshot(TSerialize ser, int flags=0);
 
 	virtual int AddGeometry(phys_geometry *pgeom, pe_geomparams* params,int id=-1,int bThreadSafe=1);
