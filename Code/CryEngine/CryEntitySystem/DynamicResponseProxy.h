@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////////
 class CEntityComponentDynamicResponse final : public IEntityDynamicResponseComponent
 {
-	CRY_ENTITY_COMPONENT_CLASS(CEntityComponentDynamicResponse,IEntityDynamicResponseComponent,"CEntityComponentDynamicResponse",0x891F8E50BAF84E95,0xB5F94F7BC07EB663);
+	CRY_ENTITY_COMPONENT_CLASS(CEntityComponentDynamicResponse,IEntityDynamicResponseComponent,"",0x891F8E50BAF84E95,0xB5F94F7BC07EB663);
 
 	CEntityComponentDynamicResponse();
 	virtual ~CEntityComponentDynamicResponse();

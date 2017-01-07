@@ -26,7 +26,7 @@ struct SProximityElement;
 //////////////////////////////////////////////////////////////////////////
 class CEntityComponentTriggerBounds : public IEntityTriggerComponent
 {
-	CRY_ENTITY_COMPONENT_CLASS(CEntityComponentTriggerBounds,IEntityTriggerComponent,"CEntityComponentTriggerBounds",0x1C58115AA18E446E,0x8E82B3B4C6DD6F55);
+	CRY_ENTITY_COMPONENT_CLASS(CEntityComponentTriggerBounds,IEntityTriggerComponent,"",0x1C58115AA18E446E,0x8E82B3B4C6DD6F55);
 
 	CEntityComponentTriggerBounds();
 	virtual ~CEntityComponentTriggerBounds();

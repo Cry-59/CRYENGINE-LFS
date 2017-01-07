@@ -30,7 +30,7 @@ struct SScriptState;
 //////////////////////////////////////////////////////////////////////////
 class CEntityComponentLuaScript : public IEntityScriptComponent
 {
-	CRY_ENTITY_COMPONENT_CLASS(CEntityComponentLuaScript,IEntityScriptComponent,"CEntityComponentLuaScript",0x38CF87CCD44B4A1D,0xA16D7EA3C5BDE757);
+	CRY_ENTITY_COMPONENT_CLASS(CEntityComponentLuaScript,IEntityScriptComponent,"",0x38CF87CCD44B4A1D,0xA16D7EA3C5BDE757);
 
 	CEntityComponentLuaScript();
 	virtual ~CEntityComponentLuaScript();

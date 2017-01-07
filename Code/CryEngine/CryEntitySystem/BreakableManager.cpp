@@ -1608,7 +1608,7 @@ void CBreakableManager::ApplyPartBreakToClonedObjectFromEvent(const SRenderNodeC
 
 class CTimeoutKillComponent : public IEntityComponent
 {
-	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CTimeoutKillComponent,"CTimeoutKillComponent",0xB55E276D1CA5AA14,0x87FBCA961E102DFF)
+	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CTimeoutKillComponent,"",0xB55E276D1CA5AA14,0x87FBCA961E102DFF)
 
 public:
 	virtual void ProcessEvent(SEntityEvent& event) final
