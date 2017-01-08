@@ -2386,15 +2386,24 @@ void CEntity::PhysicsNetSerializeEnable(bool enable)
 }
 
 //////////////////////////////////////////////////////////////////////////
-void CEntity::PhysicsNetSerializeTyped(TSerialize& ser, int type, int flags)
+void CEntity::PhysicsNetSerializeTyped(TSerialize ser, int type, int flags)
 {
 	m_physics.SerializeTyped(ser, type, flags);
 }
 
 //////////////////////////////////////////////////////////////////////////
-void CEntity::PhysicsNetSerialize(TSerialize& ser)
+void CEntity::PhysicsNetSerialize(TSerialize ser)
 {
 	m_physics.Serialize(ser);
+}
+
+//////////////////////////////////////////////////////////////////////////
+void CEntity::NetworkSerialize(TSerialize ser, uint32 aspect, uint8 profile, int flags)
+{
+	for (auto& componentRecord : m_components.GetVector())
+	{
+		componentRecord.pComponent->NetworkSerialize(ser, aspect, profile, flags);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

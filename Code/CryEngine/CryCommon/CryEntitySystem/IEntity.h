@@ -1101,8 +1101,9 @@ public:
 
 	//! Enable/disable network serialization of the physics aspect.
 	virtual void PhysicsNetSerializeEnable(bool enable) = 0;
-	virtual void PhysicsNetSerializeTyped(TSerialize &ser, int type, int flags) = 0;
-	virtual void PhysicsNetSerialize(TSerialize &ser) = 0;
+	virtual void PhysicsNetSerializeTyped(TSerialize ser, int type, int flags) = 0;
+	virtual void PhysicsNetSerialize(TSerialize ser) = 0;
+	virtual void NetworkSerialize(TSerialize ser, uint32 aspect, uint8 profile, int flags) = 0;
 	//////////////////////////////////////////////////////////////////////////
 
 	// Custom entity material.

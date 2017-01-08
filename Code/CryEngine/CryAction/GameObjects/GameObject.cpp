@@ -1219,6 +1219,8 @@ bool CGameObject::NetSerialize(TSerialize ser, EEntityAspects aspect, uint8 prof
 		GetEntity()->PhysicsNetSerialize(ser);
 	}
 
+	GetEntity()->NetworkSerialize(ser, aspect, profile, flags);
+
 	return true;
 }
 

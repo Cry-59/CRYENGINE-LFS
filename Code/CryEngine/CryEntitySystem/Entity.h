@@ -236,8 +236,9 @@ public:
 	virtual int  GetPhysicalEntityPartId0(int islot = 0) final;
 
 	virtual void PhysicsNetSerializeEnable(bool enable) final;
-	virtual void PhysicsNetSerializeTyped(TSerialize& ser, int type, int flags) final;
-	virtual void PhysicsNetSerialize(TSerialize& ser) final;
+	virtual void PhysicsNetSerializeTyped(TSerialize ser, int type, int flags) final;
+	virtual void PhysicsNetSerialize(TSerialize ser) final;
+	virtual void NetworkSerialize(TSerialize ser, uint32 aspect, uint8 profile, int flags) final;
 	//////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////////////

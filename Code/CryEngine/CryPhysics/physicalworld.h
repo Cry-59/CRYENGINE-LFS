@@ -325,6 +325,9 @@ public:
 		m_iTimeSnapshot[iType] = itime_snapshot; m_timeSnapshot[iType] = itime_snapshot*m_vars.timeGranularity;
 	}
 
+	virtual float GetSnapshotTime(int iType = 0) { return m_iTimeSnapshot[iType] * m_vars.timeGranularity; }
+	virtual int GetiSnapshotTime(int iType = 0) { return m_iTimeSnapshot[iType]; }
+
 	// *important* if request RWIs queued iForeignData should be a EPhysicsForeignIds
 	virtual int RayWorldIntersection(const Vec3& org,const Vec3& dir, int objtypes, unsigned int flags, ray_hit *hits,int nmaxhits,
 		IPhysicalEntity **pSkipEnts=0,int nSkipEnts=0, void *pForeignData=0,int iForeignData=0,

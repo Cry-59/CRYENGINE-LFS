@@ -3338,6 +3338,9 @@ struct IPhysicalWorld
 	virtual void  SetSnapshotTime(float time_snapshot, int iType = 0) = 0; //!< time corresponding to the current snapshot
 	virtual void  SetiSnapshotTime(int itime_snapshot, int iType = 0) = 0;
 
+	virtual float GetSnapshotTime(int iType = 0) = 0;
+	virtual int GetiSnapshotTime(int iType = 0) = 0;
+
 	//! GetEntitiesInBox - uses entity grid to query entites in bbox (objtypes - see enum entity_query_flags)
 	//! unless ent_allocate_list is set, returns pre-alocated internal list for iCaller==MAX_PHYS_THREADS
 	//! otherwise, tries to use supplied pList up to szListPrealloc, allocates a new one if the size's not enough
