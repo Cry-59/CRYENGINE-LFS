@@ -1775,6 +1775,36 @@ int CSoftEntity::RayTrace(SRayTraceRes& rtr)
 	return 0;
 }
 
+
+int CSoftEntity::GetStateSnapshot(CStream &stm,float time_back,int flags)
+{
+	stm.WriteNumberInBits(SNAPSHOT_VERSION,4);
+	stm.WriteBits((uint8*)&m_qrot0,sizeof(m_qrot0)*8);
+	stm.Write(m_bAwake!=0);
+	return 1;
+}
+
+int CSoftEntity::SetStateFromSnapshot(CStream &stm, int flags)
+{
+	int ver=0; 
+	bool bnz;
+
+	stm.ReadNumberInBits(ver,4);
+	if (ver!=SNAPSHOT_VERSION)
+		return 0;
+
+	if (!(flags & ssf_no_update)) {
+		pe_params_pos pp;
+		stm.ReadBits((uint8*)&pp.q,sizeof(pp.q)*8);
+		SetParams(&pp);
+		stm.Read(bnz);
+		m_bAwake = bnz? 1:0;
+	} else
+		stm.Seek(stm.GetReadPos()+sizeof(quaternionf)*8+1);
+
+	return 1;
+}
+
 int CSoftEntity::GetStateSnapshot(TSerialize ser, float time_back, int flags)
 {
 	if (m_flags & sef_skeleton)

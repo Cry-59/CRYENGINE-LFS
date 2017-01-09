@@ -114,6 +114,8 @@ class CRopeEntity : public CPhysicalEntity {
 	void ApplyStiffness(float time_interval, int bTargetPoseActive, const quaternionf &qtv,const Vec3 &offstv,float scaletv);
 
 	enum snapver { SNAPSHOT_VERSION = 8 };
+	virtual int GetStateSnapshot(CStream &stm, float time_back=0,int flags=0);
+	virtual int SetStateFromSnapshot(CStream &stm, int flags);
 	virtual int GetStateSnapshot(TSerialize ser, float time_back=0,int flags=0);
 	virtual int SetStateFromSnapshot(TSerialize ser, int flags);
 

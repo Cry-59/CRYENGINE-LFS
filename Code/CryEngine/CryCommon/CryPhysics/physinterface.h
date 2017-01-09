@@ -2643,12 +2643,17 @@ struct IPhysicalEntity
 	virtual void* GetForeignData(int itype = 0) const = 0; //!< returns entity's pForeignData if itype matches iForeignData, 0 otherwise
 	virtual int   GetiForeignData() const = 0;             //!< returns entity's iForegnData
 
+	virtual int          GetStateSnapshot(class CStream& stm, float time_back = 0, int flags = 0) = 0; //!< obsolete, was used in Far Cry
 	virtual int          GetStateSnapshot(TSerialize ser, float time_back = 0, int flags = 0) = 0;
-	virtual int          PostSetStateFromSnapshot() = 0;
+	virtual int          SetStateFromSnapshot(class CStream& stm, int flags = 0) = 0;    //!< obsolete
+	virtual int          PostSetStateFromSnapshot() = 0;                                 //!< obsolete
+	virtual unsigned int GetStateChecksum() = 0;                                         //!< obsolete
 	virtual void         SetNetworkAuthority(int authoritive = -1, int paused = -1) = 0; //!< -1 dont change, 0 - set to false, 1 - set to true
 
 	virtual int          SetStateFromSnapshot(TSerialize ser, int flags = 0) = 0;
 	virtual int          SetStateFromTypedSnapshot(TSerialize ser, int type, int flags = 0) = 0;
+	virtual int          GetStateSnapshotTxt(char* txtbuf, int szbuf, float time_back = 0) = 0; //!< packs state into ASCII text
+	virtual void         SetStateFromSnapshotTxt(const char* txtbuf, int szbuf) = 0;
 
 	//! DoStep: evolves entity in time. Normally this is called from PhysicalWorld::TimeStep
 	virtual int             DoStep(float time_interval, int iCaller = MAX_PHYS_THREADS) = 0;

@@ -64,6 +64,50 @@
 #include <CryMath/Cry_Math.h>
 #include <CryMath/Cry_XOptimise.h>
 
+#define NO_CRY_STREAM
+
+#ifndef NO_CRY_STREAM
+#include "Stream.h"
+#else
+#include <CrySystem/ISystem.h>
+#include <CrySystem/ILog.h>
+
+class CStream {
+public:
+bool WriteBits(unsigned char *pBits, uint32 nSize) { return true; }
+	bool ReadBits(unsigned char *pBits, uint32 nSize) { return true; }
+	bool Write(bool b) { return true; }
+	bool Write(char c) { return true; }
+	bool Write(unsigned char uc) { return true; }
+	bool Write(float f) { return true; }
+	bool Write(unsigned short us) { return true; }
+	bool Write(short s) { return true; }
+	bool Write(int i) { return true; }
+	bool Write(unsigned int ui) { return true; }
+	bool Write(const Vec3 &v) { return true; }
+	bool Write(const Ang3 &v) { return true; }
+	bool Read(bool &b) { return true; }
+	bool Read(char &c) { return true; }
+	bool Read(unsigned char &uc) { return true; }
+	bool Read(unsigned short &us) { return true; }
+	bool Read(short &s) { return true; }
+	bool Read(int &i) { return true; }
+	bool Read(unsigned int &ui) { return true; }
+	bool Read(float &f) { return true; }
+	bool Read(Vec3 &v) { return true; }
+	bool Read(Ang3 &v) { return true; }
+	bool WriteNumberInBits(int n,size_t nSize) { return true; }
+	bool WriteNumberInBits(unsigned int n,size_t nSize) { return true; }
+	bool ReadNumberInBits(int &n,size_t nSize) { return true; }
+	bool ReadNumberInBits(unsigned int &n,size_t nSize) { return true; }
+	bool Seek(size_t dwPos = 0) { return true; }
+	size_t GetReadPos() { return 0; }
+	unsigned char *GetPtr() const { return 0; };
+	size_t GetSize() const { return 0; }
+	bool SetSize(size_t indwBitSize) { return true; }
+};
+#endif
+
 #if CRY_PLATFORM_WINDOWS && CRY_PLATFORM_64BIT
 #undef min
 #undef max

@@ -2410,6 +2410,147 @@ void CArticulatedEntity::DrawHelperInformation(IPhysRenderer *pRenderer, int fla
 	}
 }
 
+int CArticulatedEntity::GetStateSnapshot(CStream &stm,float time_back,int flags)
+{
+	stm.WriteNumberInBits(SNAPSHOT_VERSION,4);
+	stm.Write((unsigned char)m_nJoints);
+	stm.Write(m_pos);
+	stm.Write(m_body.v);
+	stm.Write(m_bAwake!=0);
+	int i = m_iSimClass-1;
+	stm.WriteNumberInBits(i,2);
+
+#ifdef DEBUG_BONES_SYNC
+	stm.WriteBits((uint8*)&m_qrot,sizeof(m_qrot)*8);
+	for(i=0;i<m_nParts;i++) {
+		stm.Write(m_parts[i].pos);
+		stm.WriteBits((uint8*)&m_parts[i].q,sizeof(m_parts[i].q)*8);
+	}
+	return 1;
+#endif
+
+	if (m_bPartPosForced) for(i=0;i<m_nJoints;i++) {
+		int j = m_joints[i].iStartPart;
+		m_joints[i].quat = m_qrot*m_parts[j].q*!m_infos[j].q0;
+		m_joints[i].body.pos = m_parts[j].pos-m_joints[i].quat*m_infos[j].pos0+m_pos;
+		m_joints[i].body.q = m_joints[i].quat*!m_joints[i].body.qfb;
+	}
+
+	for(i=0;i<m_nJoints;i++) {
+		stm.Write(m_joints[i].bAwake!=0);
+		stm.Write((Vec3)m_joints[i].q);
+		stm.Write(m_joints[i].dq);
+
+		stm.Write((Vec3)m_joints[i].qext);
+		stm.Write(m_joints[i].body.pos);
+		stm.WriteBits((uint8*)&m_joints[i].body.q,sizeof(m_joints[i].body.q)*8);
+		if (m_joints[i].bQuat0Changed) {
+			stm.Write(true);
+			stm.WriteBits((uint8*)&m_joints[i].quat0, sizeof(m_joints[i].quat0)*8);
+		} else stm.Write(false);
+		if (m_joints[i].body.P.len2()+m_joints[i].body.L.len2()>0) {
+			stm.Write(true); 
+			stm.Write(m_joints[i].body.P);
+			stm.Write(m_joints[i].body.L);
+		}	else stm.Write(false);
+	}
+
+	WriteContacts(stm,flags);
+
+	return 1;
+}
+
+int CArticulatedEntity::SetStateFromSnapshot(CStream &stm, int flags)
+{
+	int i=0,j,ver=0; 
+	bool bnz;
+	Matrix33 R;
+	unsigned char nJoints;
+
+	stm.ReadNumberInBits(ver,4);
+	if (ver!=SNAPSHOT_VERSION)
+		return 0;
+	stm.Read(nJoints);
+	if (nJoints!=m_nJoints)
+		return 0;
+
+	if (!(flags & ssf_no_update)) {
+		stm.Read(m_posNew);
+		stm.Read(m_body.v);
+		stm.Read(bnz); m_bAwake = bnz ? 1:0;
+		stm.ReadNumberInBits(i, 2); m_iSimClass=i+1;
+
+#ifdef DEBUG_BONES_SYNC
+stm.ReadBits((uint8*)&m_qrot,sizeof(m_qrot)*8);
+for(i=0;i<m_nParts;i++) {
+	stm.Read(m_parts[i].pos);
+	stm.ReadBits((uint8*)&m_parts[i].q,sizeof(m_parts[i].q)*8);
+}
+#else
+		for(i=0;i<m_nJoints;i++) {
+			stm.Read(bnz);
+			m_joints[i].bAwake = bnz ? 1:0;
+			stm.Read(m_joints[i].q);
+			stm.Read(m_joints[i].dq);
+			//SyncBodyWithJoint(i);
+
+			stm.Read(m_joints[i].qext);
+			stm.Read(m_joints[i].body.pos);
+			stm.ReadBits((uint8*)&m_joints[i].body.q,sizeof(m_joints[i].body.q)*8);
+			stm.Read(bnz); if (bnz)	{
+				stm.ReadBits((uint8*)&m_joints[i].quat0,sizeof(m_joints[i].quat0)*8);
+				m_joints[i].bQuat0Changed = 1;
+			} else m_joints[i].bQuat0Changed = 0;
+			stm.Read(bnz); if (bnz)	{
+				stm.Read(m_joints[i].body.P);
+				stm.Read(m_joints[i].body.L);
+			}	else {
+				m_joints[i].body.P.zero();
+				m_joints[i].body.L.zero();
+			}
+			m_body.UpdateState();
+
+			UpdateJointRotationAxes(i);
+			m_joints[i].quat = m_joints[i].body.q*m_joints[i].body.qfb;
+			//m_joints[i].body.q.getmatrix(R); //Q2M_IVO
+			R = Matrix33(m_joints[i].body.q);
+			m_joints[i].I = R*m_joints[i].body.Ibody*R.T();
+
+			for(j=m_joints[i].iStartPart; j<m_joints[i].iStartPart+m_joints[i].nParts; j++) {
+				m_infos[j].q = m_joints[i].quat*m_infos[j].q0;
+				m_infos[j].pos = m_joints[i].quat*m_infos[j].pos0+m_joints[i].body.pos-m_posNew;
+			}
+		}
+#endif
+
+		m_bUpdateBodies = 0;
+		ComputeBBox(m_BBoxNew);
+		UpdatePosition(m_pWorld->RepositionEntity(this,1,m_BBoxNew));
+	} else {
+		masktype dummy;
+		stm.Seek(stm.GetReadPos()+2*sizeof(Vec3)*8+3);
+#ifdef DEBUG_BONES_SYNC
+stm.Seek(stm.GetReadPos()+sizeof(quaternionf)*8+m_nParts*(sizeof(quaternionf)+sizeof(Vec3))*8);
+#else
+		for(i=0;i<m_nJoints;i++) {
+			stm.Seek(stm.GetReadPos()+1+4*sizeof(Vec3)*8+sizeof(quaternionf)*8);
+			stm.Read(bnz); if (bnz) 
+				stm.Seek(stm.GetReadPos()+sizeof(quaternionf)*8);
+			stm.Read(bnz); if (bnz) 
+				stm.Seek(stm.GetReadPos()+2*sizeof(Vec3)*8);
+			ReadPacked(stm,dummy);
+		}
+#endif
+	}
+
+#ifndef DEBUG_BONES_SYNC
+	ReadContacts(stm,flags);
+#endif
+
+	return 1;
+}
+
+
 int CArticulatedEntity::GetStateSnapshot(TSerialize ser, float time_back, int flags)
 {
 	if (ser.GetSerializationTarget() == eST_Network)

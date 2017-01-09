@@ -24,6 +24,8 @@ class CParticleEntity : public CPhysicalEntity {
 	virtual void AlertNeighbourhoodND(int mode) { if (m_pColliderToIgnore) m_pColliderToIgnore->Release(); m_pColliderToIgnore=0; }
 
 	enum snapver { SNAPSHOT_VERSION = 3 };
+	virtual int GetStateSnapshot(class CStream &stm,float time_back=0,int flags=0);
+	virtual int SetStateFromSnapshot(class CStream &stm, int flags);
 
 	virtual int GetStateSnapshot(TSerialize ser, float time_back, int flags);
 	virtual int SetStateFromSnapshot(TSerialize ser, int flags);

@@ -644,16 +644,45 @@ ILINE bool is_valid(const Quat& op) { return is_valid(op|op); }
 
 template<class dtype> bool is_valid(const dtype &op) { return is_valid(op.x*op.x + op.y*op.y + op.z*op.z); }
 
+void WritePacked(CStream &stm, int num);
+void WritePacked(CStream &stm, uint64 num);
+void ReadPacked(CStream &stm,int &num);
+void ReadPacked(CStream &stm,uint64 &num);
+void WriteCompressedPos(CStream &stm, const Vec3 &pos, bool bCompress=true);
+void ReadCompressedPos(CStream &stm, Vec3 &pos, bool &bWasCompressed);
 Vec3 CompressPos(const Vec3 &pos);
 const int CMP_QUAT_SZ = 49;
+void WriteCompressedQuat(CStream &stm, const quaternionf &q);
+void ReadCompressedQuat(CStream &stm,quaternionf &q);
 quaternionf CompressQuat(const quaternionf &q);
 const int CMP_VEL_SZ = 48;
+ILINE void WriteCompressedVel(CStream &stm, const Vec3 &vel, const float maxvel) {
+	stm.Write((short)max(-32768,min(32767,float2int(vel.x*(32767.0f/maxvel)))));
+	stm.Write((short)max(-32768,min(32767,float2int(vel.y*(32767.0f/maxvel)))));
+	stm.Write((short)max(-32768,min(32767,float2int(vel.z*(32767.0f/maxvel)))));
+}
+ILINE void ReadCompressedVel(CStream &stm, Vec3 &vel, const float maxvel) {
+	short i;
+	stm.Read(i); vel.x = i*(maxvel/32767.0f);
+	stm.Read(i); vel.y = i*(maxvel/32767.0f);
+	stm.Read(i); vel.z = i*(maxvel/32767.0f);
+}
 ILINE Vec3 CompressVel(const Vec3 &vel, const float maxvel) {
 	Vec3 res;
 	res.x = max(-32768,min(32767,float2int(vel.x*(32767.0f/maxvel)))) * (maxvel/32767.0f);
 	res.y = max(-32768,min(32767,float2int(vel.y*(32767.0f/maxvel)))) * (maxvel/32767.0f);
 	res.z = max(-32768,min(32767,float2int(vel.z*(32767.0f/maxvel)))) * (maxvel/32767.0f);
 	return res;
+}
+ILINE void WriteCompressedFloat(CStream &stm, float f, const float maxval,const int nBits) {
+	const int imax = (1<<nBits-1)-1;
+	stm.WriteNumberInBits(max(-imax-1,min(imax,float2int(f*(imax/maxval)))),nBits);
+}
+ILINE void ReadCompressedFloat(CStream &stm, float &f, const float maxval,const int nBits) {
+	const int imax = (1<<nBits-1)-1;
+	unsigned int num;
+	stm.ReadNumberInBits(num,nBits);
+	f = ((int)num | ((int)num<<32-nBits & 1<<31)>>31-nBits)*(maxval/imax);
 }
 ILINE float CompressFloat(float f,const float maxval,const int nBits) {
 	const int imax = (1<<nBits-1)-1;

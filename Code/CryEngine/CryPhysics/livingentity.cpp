@@ -742,6 +742,74 @@ int CLivingEntity::Action(pe_action* _action, int bThreadSafe)
 	return CPhysicalEntity::Action(_action,1);
 }
 
+
+int CLivingEntity::GetStateSnapshot(CStream &stm,float time_back,int flags)
+{
+	WriteLock lock0(m_lockUpdate),lock1(m_lockLiving);
+	Vec3 pos_prev=m_pos, vel_prev=m_vel, nslope_prev=m_nslope;
+	int bFlying_prev=m_bFlying;
+	float timeFlying_prev=m_timeFlying, timeUseLowCap_prev=m_timeUseLowCap;
+	quaternionf qrot_prev=m_qrot;
+	CPhysicalEntity *pLastGroundCollider=m_pLastGroundCollider;
+	int iLastGroundColliderPart=m_iLastGroundColliderPart;
+	Vec3 posLastGroundColl=m_posLastGroundColl;
+	ReleaseGroundCollider();
+	stm.WriteNumberInBits(SNAPSHOT_VERSION,4);
+	if (m_pWorld->m_vars.bMultiplayer) {
+		WriteCompressedPos(stm,m_pos,(m_id+m_iSnapshot&31)!=0);
+		if (m_pWorld->m_iTimePhysics!=m_iTimeLastSend) {
+			m_iSnapshot++; m_iTimeLastSend = m_pWorld->m_iTimePhysics;
+		}
+	} else
+		stm.Write(m_pos);
+
+	if (m_flags & lef_snap_velocities) {
+		if (m_vel.len2()>0) {
+			stm.Write(true);
+			Vec3_tpl<short> v = EncodeVec6b(m_vel);
+			stm.Write(v.x); stm.Write(v.y); stm.Write(v.z);
+		} else stm.Write(false);
+		if (m_velRequested.len2()>0) {
+			stm.Write(true);
+			vec4b vr = EncodeVec4b(m_velRequested);
+			stm.Write(vr.yaw); stm.Write(vr.pitch);	stm.Write(vr.len);
+		} else stm.Write(false);
+	} else {
+		if (m_vel.len2()>0) {
+			stm.Write(true);
+			stm.Write(m_vel);
+		} else stm.Write(false);
+		if (m_velRequested.len2()>0) {
+			stm.Write(true);
+			stm.Write(m_velRequested);
+		} else stm.Write(false);
+	}
+	if (m_timeFlying>0) {
+		stm.Write(true);
+		stm.Write((unsigned short)float2int(m_timeFlying*6553.6f));
+	} else stm.Write(false);
+	unsigned int imft = 0;
+	stm.WriteNumberInBits(imft,2);
+	stm.Write((bool)(m_bFlying!=0));
+
+	/*if (m_pLastGroundCollider) {
+		stm.Write(true);
+		WritePacked(stm, m_pWorld->GetPhysicalEntityId(m_pLastGroundCollider)+1);
+		WritePacked(stm, m_iLastGroundColliderPart);
+		stm.Write((Vec3&)m_posLastGroundColl);
+	} else
+		stm.Write(false);*/
+
+	m_pos=pos_prev; m_vel=vel_prev; m_bFlying=bFlying_prev; m_qrot=qrot_prev; 
+	m_timeFlying=timeFlying_prev; m_timeUseLowCap = timeUseLowCap_prev;
+	m_nslope=nslope_prev;
+	SetGroundCollider(pLastGroundCollider);
+	m_iLastGroundColliderPart=iLastGroundColliderPart;
+	m_posLastGroundColl=posLastGroundColl;
+	
+	return 1;
+}
+
 void SLivingEntityNetSerialize::Serialize( TSerialize ser )
 {
 	ser.Value( "pos", pos, 'wrld');
@@ -762,6 +830,92 @@ int CLivingEntity::GetStateSnapshot(TSerialize ser, float time_back, int flags)
 
 	return 1;
 }
+
+
+int CLivingEntity::SetStateFromSnapshot(CStream &stm, int flags)
+{
+	bool bnz,bCompressed;
+	unsigned short tmp;
+	int ver=0;
+	stm.ReadNumberInBits(ver,4);
+	if (ver!=SNAPSHOT_VERSION)
+		return 0;
+
+	WriteLock lock0(m_lockUpdate),lock1(m_lockLiving);
+	if (flags & ssf_no_update) {
+		Vec3 dummy;
+		if (m_pWorld->m_vars.bMultiplayer)
+			ReadCompressedPos(stm,dummy,bCompressed);
+		else
+			stm.Seek(stm.GetReadPos()+sizeof(Vec3)*8);
+		stm.Read(bnz); if (bnz) stm.Seek(stm.GetReadPos()+((m_flags & lef_snap_velocities) ? 6:sizeof(Vec3))*8);
+		stm.Read(bnz); if (bnz) stm.Seek(stm.GetReadPos()+((m_flags & lef_snap_velocities) ? 4:sizeof(Vec3))*8);
+		stm.Read(bnz); if (bnz) stm.Seek(stm.GetReadPos()+sizeof(tmp)*8);
+		stm.Seek(stm.GetReadPos()+3);
+		return 1;
+	}
+
+	m_posLocal = m_pos + m_deltaPos*(m_timeSmooth*(1/0.3f));
+
+	Vec3 pos0=m_pos/*,vel0=m_vel,velRequested0=m_velRequested*/;
+//	int bFlying0=m_bFlying;
+	
+	if (m_pWorld->m_vars.bMultiplayer) {
+		ReadCompressedPos(stm,m_pos,bCompressed);
+		// if we received compressed pos, and our pos0 compressed is equal to it, assume the server had pos equal to our uncompressed pos0
+		if (bCompressed && (CompressPos(pos0)-m_pos).len2()<sqr(0.0001f))
+			m_pos = pos0;
+	} else
+		stm.Read(m_pos);
+
+	if (m_flags & lef_snap_velocities) {
+		stm.Read(bnz); if (bnz) {
+			Vec3_tpl<short> v; stm.Read(v.x); stm.Read(v.y); stm.Read(v.z);
+			m_vel = DecodeVec6b(v);
+		} else m_vel.zero();
+		stm.Read(bnz); if (bnz) {
+			vec4b vr; stm.Read(vr.yaw); stm.Read(vr.pitch);	stm.Read(vr.len);
+			m_velRequested = DecodeVec4b(vr);
+		} else m_velRequested.zero();
+	} else {
+		stm.Read(bnz); if (bnz)
+			stm.Read(m_vel);
+		else m_vel.zero();
+		stm.Read(bnz); if (bnz)
+			stm.Read(m_velRequested);
+		else m_velRequested.zero();
+	}
+	stm.Read(bnz); if (bnz) {
+		stm.Read(tmp); m_timeFlying = tmp*(10.0f/65536);
+	} else m_timeFlying = 0;
+	unsigned int imft; stm.ReadNumberInBits(imft,2);
+	static float flytable[] = {0.0f, 0.2f, 0.5f, 1.0f};
+	stm.Read(bnz);
+	m_bFlying = bnz ? 1:0;
+	ReleaseGroundCollider();
+	m_bJumpRequested = 0;
+
+	/*stm.Read(bnz);
+	if (bnz) {
+		SetGroundCollider((CPhysicalEntity*)m_pWorld->GetPhysicalEntityById(ReadPackedInt(stm)-1));
+		m_iLastGroundColliderPart = ReadPackedInt(stm);
+		stm.Read((Vec3&)m_posLastGroundColl);
+	}*/
+
+#ifdef _DEBUG
+	float diff = (m_pos-pos0).len2();
+	if (diff>sqr(0.0001f) && flags&ssf_compensate_time_diff && m_bActive)
+		m_pWorld->m_pLog->Log("Local client desync: %.4f",sqrt_tpl(diff));
+#endif
+	if (m_pos.len2()>1E18) {
+		m_pos = pos0;
+		return 1;
+	}
+
+	return 1;
+}
+
+
 int CLivingEntity::SetStateFromSnapshot(TSerialize ser, int flags)
 {
 	SLivingEntityNetSerialize helper;

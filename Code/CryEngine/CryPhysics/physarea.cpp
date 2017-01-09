@@ -41,10 +41,15 @@ public:
 	virtual void *GetForeignData(int itype=0) const { return 0; }
 	virtual int GetiForeignData() const { return 0; }
 
+	virtual int GetStateSnapshot(class CStream &stm, float time_back=0, int flags=0) { return 0; }
 	virtual int GetStateSnapshot(TSerialize ser, float time_back=0, int flags=0) { return 0; }
+	virtual int SetStateFromSnapshot(class CStream &stm, int flags=0) { return 0; }
 	virtual int SetStateFromSnapshot(TSerialize ser, int flags=0) { return 0; }
 	virtual int SetStateFromTypedSnapshot(TSerialize ser, int type, int flags/* =0 */) {return 0;}
 	virtual int PostSetStateFromSnapshot() { return 0; }
+	virtual int GetStateSnapshotTxt(char *txtbuf,int szbuf, float time_back=0) { return 0; }
+	virtual void SetStateFromSnapshotTxt(const char *txtbuf,int szbuf) {}
+	virtual unsigned int GetStateChecksum() { return 0; }
 	virtual void SetNetworkAuthority(int authoritive, int paused) {}
 
 	virtual void StartStep(float time_interval) {}

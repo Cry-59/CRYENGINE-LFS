@@ -1029,6 +1029,61 @@ int CoverPolygonWithCircles(strided_pointer<Vec2> pt,int npt,bool bConsecutive, 
 	return nCircles;
 }
 
+void WritePacked(CStream &stm, int num)
+{
+	int i; for(i=0;i<16 && (unsigned int)num>=1u<<i*2;i++);
+	stm.WriteNumberInBits(i,5);
+	if (i>0)
+		stm.WriteNumberInBits(num,i*2);
+}
+void WritePacked(CStream &stm, uint64 num)
+{
+	WritePacked(stm,(int)(num & 0xFFFFFFFF));
+	WritePacked(stm,(int)(num>>32 & 0xFFFFFFFF));
+}
+
+void ReadPacked(CStream &stm,int &num)
+{
+	int i; num=0;
+	stm.ReadNumberInBits(i,5);
+	if(i>16)
+		CryFatalError("ReadPacked i==%i", i);
+	if (i>0)
+		stm.ReadNumberInBits(num,i*2);
+}
+void ReadPacked(CStream &stm,uint64 &num)
+{
+	int ilo,ihi;
+	ReadPacked(stm,ilo);
+	ReadPacked(stm,ihi);
+	num = (uint64)(unsigned int)ihi<<32 | (uint64)(unsigned int)ilo;
+}
+
+void WriteCompressedPos(CStream &stm, const Vec3 &pos, bool bCompress)
+{
+	if(!inrange(pos.x,0.0f,2048.0f) || !inrange(pos.y,0.0f,2048.0f) || !inrange(pos.z,0.0f,512.0f) || !bCompress) {
+		stm.Write(false);
+		stm.Write(pos);
+	} else {
+		stm.Write(true);
+		stm.WriteNumberInBits(float2int(pos.x*512.0f),20);
+		stm.WriteNumberInBits(float2int(pos.y*512.0f),20);
+		stm.WriteNumberInBits(float2int(pos.z*512.0f),18);
+	}
+	//stm.WritePkd(CStreamData_WorldPos(const_cast<Vec3&>(pos)));
+}
+void ReadCompressedPos(CStream &stm, Vec3 &pos, bool &bWasCompressed)
+{
+	stm.Read(bWasCompressed);
+	if (bWasCompressed) {
+		unsigned int ix,iy,iz;
+		stm.ReadNumberInBits(ix, 20); pos.x = ix*(1.0f/512);
+		stm.ReadNumberInBits(iy, 20); pos.y = iy*(1.0f/512);
+		stm.ReadNumberInBits(iz, 18); pos.z = iz*(1.0f/512);
+	} else
+		stm.Read(pos);
+	//stm.ReadPkd(CStreamData_WorldPos(pos));
+}
 Vec3 CompressPos(const Vec3 &pos)
 {
 	if(!inrange(pos.x,0.0f,2048.0f) || !inrange(pos.y,0.0f,2048.0f) || !inrange(pos.z,0.0f,512.0f))
@@ -1047,6 +1102,20 @@ bool getCompressedQuat(const quaternionf &q, Vec3_tpl<short> &res)
 	res.y = max(-32768,min(32767,float2int(angles.y*(32767/(g_PI*0.5f)))));
 	res.z = max(-32768,min(32767,float2int(angles.z*(32767/g_PI))));
 	return bGimbalLocked;
+}
+void WriteCompressedQuat(CStream &stm, const quaternionf &q)
+{
+	Vec3_tpl<short> sangles;
+	stm.Write(getCompressedQuat(q,sangles));
+	stm.Write(sangles.x); stm.Write(sangles.y); stm.Write(sangles.z);
+}
+void ReadCompressedQuat(CStream &stm,quaternionf &q)
+{
+	bool bGimbalLocked; stm.Read(bGimbalLocked);
+	Vec3_tpl<short> sangles; stm.Read(sangles.x); stm.Read(sangles.y); stm.Read(sangles.z);
+	q = Quat::CreateRotationXYZ( Ang3(sangles.x*(g_PI/32767),sangles.y*(g_PI*0.5f/32767),sangles.z*(g_PI/32767)));
+	if (bGimbalLocked)
+		q *= Quat::CreateRotationAA((float)-g_PI/6,Vec3(0,1,0));
 }
 quaternionf CompressQuat(const quaternionf &q)
 {
