@@ -1606,6 +1606,11 @@ void CBreakableManager::ApplyPartBreakToClonedObjectFromEvent(const SRenderNodeC
 	}
 }
 
+class CMinimalComponent : public IEntityComponent
+{
+	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CMinimalComponent, "Minimal Component", 0x5EFB515466B34A6D, 0x9D706229410C5A53)
+};
+
 class CTimeoutKillComponent : public IEntityComponent
 {
 	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CTimeoutKillComponent,"",0xB55E276D1CA5AA14,0x87FBCA961E102DFF)

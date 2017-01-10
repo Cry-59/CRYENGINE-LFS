@@ -556,6 +556,11 @@ enum EAIFilterType
 	eAIFT_None,
 };
 
+struct IAIEngineModule : public IEngineModule
+{
+	CRYINTERFACE_DECLARE(IAIEngineModule, 0x4B00591DC87443C7, 0x9BCA78A59ECD6D9C);
+};
+
 //! Interface to AI system. Defines functions to control the ai system.
 struct IAISystem
 {

@@ -164,4 +164,20 @@ void CProjectManager::LoadConfiguration()
 
 		gEnv->pConsole->LoadConfigVar("sys_game_name", sGameName);
 	}
+
+	const jsmntok_t* pluginsObject = jsmnutil_xpath(js.data(), tokens.data(), "require", "plugins", 0);
+	if(pluginsObject->type == JSMN_ARRAY)
+	{
+		for (int i = 0; i < pluginsObject->size; ++i)
+		{
+			const jsmntok_t* pluginObject = pluginsObject + (i + 1);
+
+			if (pluginObject != nullptr && pluginObject->type == JSMN_STRING)
+			{
+				string sPluginPath(js.data() + pluginObject->start, pluginObject->end - pluginObject->start);
+
+				gEnv->pSystem->GetIPluginManager()->LoadPluginFromDisk(ICryPluginManager::EPluginType::EPluginType_CPP, sPluginPath);
+			}
+		}
+	}
 }

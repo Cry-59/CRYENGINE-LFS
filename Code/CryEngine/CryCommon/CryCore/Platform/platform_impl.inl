@@ -30,6 +30,11 @@ struct SSystemGlobalEnvironment* gEnv = NULL;
 struct SRegFactoryNode* g_pHeadToRegFactories = 0;
 #endif
 
+extern "C" DLL_EXPORT SRegFactoryNode* GetHeadToRegFactories()
+{
+	return g_pHeadToRegFactories;
+}
+
 #if !defined(_LIB) || defined(_LAUNCHER)
 //////////////////////////////////////////////////////////////////////////
 // If not in static library.

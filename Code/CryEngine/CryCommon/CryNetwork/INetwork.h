@@ -802,6 +802,11 @@ enum EListenerPriorityType
 	ELPT_PostEngine = 0x00020000,
 };
 
+struct INetworkEngineModule : public IEngineModule
+{
+	CRYINTERFACE_DECLARE(INetworkEngineModule, 0xE608361742194054, 0x93FA3B2ADA514755);
+};
+
 //! Main access point for creating Network objects.
 struct INetwork
 {

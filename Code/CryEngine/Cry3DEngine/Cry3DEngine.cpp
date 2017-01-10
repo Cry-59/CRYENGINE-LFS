@@ -115,9 +115,13 @@ static CSystemEventListner_3DEngine g_system_event_listener_engine;
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-class CEngineModule_Cry3DEngine : public IEngineModule
+class CEngineModule_Cry3DEngine : public I3DEngineModule
 {
-	CRYINTERFACE_SIMPLE(IEngineModule)
+	CRYINTERFACE_BEGIN()
+		CRYINTERFACE_ADD(IEngineModule)
+		CRYINTERFACE_ADD(I3DEngineModule)
+	CRYINTERFACE_END()
+
 	CRYGENERATE_SINGLETONCLASS(CEngineModule_Cry3DEngine, "EngineModule_Cry3DEngine", 0x2d38f12a521d43cf, 0xba18fd1fa7ea5020)
 
 	virtual ~CEngineModule_Cry3DEngine() {}

@@ -19,8 +19,9 @@
 #define YASLI_SERIALIZE_METHOD Serialize
 #define YASLI_SERIALIZE_OVERRIDE Serialize
 
+#ifndef NOT_USE_CRY_STRING
 #define YASLI_STRINGS_DEFINED
-#ifdef RESOURCE_COMPILER
+#if RESOURCE_COMPILER
 namespace yasli {
 typedef CryStringLocalT<char> string;
 typedef CryStringLocalT<wchar_t> wstring;
@@ -38,7 +39,8 @@ typedef yasli::wstring wstring;
 }
 
 #define YASLI_STRING_NAMESPACE_BEGIN 
-#define YASLI_STRING_NAMESPACE_END 
+#define YASLI_STRING_NAMESPACE_END
+#endif
 
 #define YASLI_ASSERT_DEFINED
 #define YASLI_ASSERT(x) CRY_ASSERT(x)
@@ -88,3 +90,7 @@ namespace yasli
 
 #define YASLI_STRING_LIST_BASE_DEFINED
 #define YASLI_INCLUDE_PROPERTY_TREE_CONFIG_LOCAL 1
+
+#if !defined(YASLI_CXX11)
+#define YASLI_CXX11 1
+#endif

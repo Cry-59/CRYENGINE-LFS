@@ -1081,7 +1081,7 @@ void CTurret::InitMannequinUserParams()
 void CTurret::InitAimProceduralContext()
 {
 	assert( m_pActionController != NULL );
-	m_pAimProceduralContext = static_cast< const CProceduralContextTurretAimPose* >( m_pActionController->FindOrCreateProceduralContext( "ProceduralContextTurretAimPose" ) );
+	m_pAimProceduralContext = static_cast< const CProceduralContextTurretAimPose* >( m_pActionController->FindOrCreateProceduralContext(CProceduralContextTurretAimPose::GetCID()) );
 }
 
 

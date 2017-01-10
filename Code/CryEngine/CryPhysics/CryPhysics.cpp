@@ -197,9 +197,13 @@ CRYPHYSICS_API IPhysicalWorld *CreatePhysicalWorld(ISystem *pSystem)
 
 #ifndef STANDALONE_PHYSICS
 //////////////////////////////////////////////////////////////////////////
-class CEngineModule_CryPhysics : public IEngineModule
+class CEngineModule_CryPhysics : public IPhysicsEngineModule
 {
-	CRYINTERFACE_SIMPLE(IEngineModule)
+	CRYINTERFACE_BEGIN()
+		CRYINTERFACE_ADD(IEngineModule)
+		CRYINTERFACE_ADD(IPhysicsEngineModule)
+	CRYINTERFACE_END()
+
 	CRYGENERATE_SINGLETONCLASS(CEngineModule_CryPhysics, "EngineModule_CryPhysics", 0x526cabf3d776407f, 0xaa2338545bb6ae7f)
 
 	virtual ~CEngineModule_CryPhysics() {}

@@ -16,9 +16,13 @@ CAudioLogger g_audioImplLogger;
 CAudioImplCVars CryAudio::Impl::PortAudio::g_audioImplCVars;
 
 //////////////////////////////////////////////////////////////////////////
-class CEngineModule_CryAudioImplPortAudio : public IEngineModule
+class CEngineModule_CryAudioImplPortAudio : public IAudioSystemImplementationModule
 {
-	CRYINTERFACE_SIMPLE(IEngineModule);
+	CRYINTERFACE_BEGIN()
+		CRYINTERFACE_ADD(IEngineModule)
+		CRYINTERFACE_ADD(IAudioSystemImplementationModule)
+	CRYINTERFACE_END()
+	
 	CRYGENERATE_SINGLETONCLASS(CEngineModule_CryAudioImplPortAudio, "EngineModule_AudioImpl", 0xaa6a039a0ce5bbab, 0x33e0aad69f3136f4);
 
 	CEngineModule_CryAudioImplPortAudio();

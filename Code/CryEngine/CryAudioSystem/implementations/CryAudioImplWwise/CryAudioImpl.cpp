@@ -25,9 +25,13 @@ tMemoryPoolReferenced g_audioImplMemoryPoolSecondary;
 #endif // PROVIDE_AUDIO_IMPL_SECONDARY_POOL
 
 //////////////////////////////////////////////////////////////////////////
-class CEngineModule_CryAudioImplWwise : public IEngineModule
+class CEngineModule_CryAudioImplWwise : public IAudioSystemImplementationModule
 {
-	CRYINTERFACE_SIMPLE(IEngineModule)
+	CRYINTERFACE_BEGIN()
+		CRYINTERFACE_ADD(IEngineModule)
+		CRYINTERFACE_ADD(IAudioSystemImplementationModule)
+	CRYINTERFACE_END()
+	
 	CRYGENERATE_SINGLETONCLASS(CEngineModule_CryAudioImplWwise, "EngineModule_AudioImpl", 0xb4971e5dd02442c5, 0xb34a9ac0b4abfffd)
 
 	CEngineModule_CryAudioImplWwise();

@@ -10,7 +10,6 @@
 class CCryFactoryRegistryImpl : public ICryFactoryRegistryImpl
 {
 public:
-	virtual ICryFactory* GetFactory(const char* cname) const;
 	virtual ICryFactory* GetFactory(const CryClassID& cid) const;
 	virtual void         IterateFactories(const CryInterfaceID& iid, ICryFactory** pFactories, size_t& numFactories) const;
 
@@ -26,19 +25,6 @@ public:
 	static CCryFactoryRegistryImpl& Access();
 
 private:
-	struct FactoryByCName
-	{
-		const char*  m_cname;
-		ICryFactory* m_ptr;
-
-		FactoryByCName(const char* cname) : m_cname(cname), m_ptr(0) { assert(m_cname); }
-		FactoryByCName(ICryFactory* ptr) : m_cname(ptr ? ptr->GetName() : 0), m_ptr(ptr) { assert(m_cname && m_ptr); }
-		bool operator<(const FactoryByCName& rhs) const { return strcmp(m_cname, rhs.m_cname) < 0; }
-	};
-	typedef std::vector<FactoryByCName>      FactoriesByCName;
-	typedef FactoriesByCName::iterator       FactoriesByCNameIt;
-	typedef FactoriesByCName::const_iterator FactoriesByCNameConstIt;
-
 	struct FactoryByCID
 	{
 		CryClassID   m_cid;
@@ -73,10 +59,9 @@ private:
 	typedef Callbacks::const_iterator                 CallbacksConstIt;
 
 private:
-	CCryFactoryRegistryImpl();
-	~CCryFactoryRegistryImpl();
+	virtual ~CCryFactoryRegistryImpl() {}
 
-	bool GetInsertionPos(ICryFactory* pFactory, FactoriesByCNameIt& itPosForCName, FactoriesByCIDIt& itPosForCID);
+	bool GetInsertionPos(ICryFactory* pFactory, FactoriesByCIDIt& itPosForCID);
 	void UnregisterFactoryInternal(ICryFactory* const pFactory);
 
 private:
@@ -85,7 +70,6 @@ private:
 private:
 	mutable CryReadModifyLock m_guard;
 
-	FactoriesByCName          m_byCName;
 	FactoriesByCID            m_byCID;
 	FactoriesByIID            m_byIID;
 

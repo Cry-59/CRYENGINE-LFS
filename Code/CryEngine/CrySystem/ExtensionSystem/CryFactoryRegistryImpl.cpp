@@ -12,34 +12,9 @@
 
 CCryFactoryRegistryImpl CCryFactoryRegistryImpl::s_registry;
 
-CCryFactoryRegistryImpl::CCryFactoryRegistryImpl()
-	: m_guard()
-	, m_byCName()
-	, m_byCID()
-	, m_byIID()
-	, m_callbacks()
-{
-}
-
-CCryFactoryRegistryImpl::~CCryFactoryRegistryImpl()
-{
-}
-
 CCryFactoryRegistryImpl& CCryFactoryRegistryImpl::Access()
 {
 	return s_registry;
-}
-
-ICryFactory* CCryFactoryRegistryImpl::GetFactory(const char* cname) const
-{
-	AUTO_READLOCK(m_guard);
-
-	if (!cname)
-		return 0;
-
-	const FactoryByCName search(cname);
-	FactoriesByCNameConstIt it = std::lower_bound(m_byCName.begin(), m_byCName.end(), search);
-	return it != m_byCName.end() && !(search < *it) ? (*it).m_ptr : 0;
 }
 
 ICryFactory* CCryFactoryRegistryImpl::GetFactory(const CryClassID& cid) const
@@ -107,7 +82,7 @@ void CCryFactoryRegistryImpl::UnregisterCallback(ICryFactoryRegistryCallback* pC
 		m_callbacks.erase(it);
 }
 
-bool CCryFactoryRegistryImpl::GetInsertionPos(ICryFactory* pFactory, FactoriesByCNameIt& itPosForCName, FactoriesByCIDIt& itPosForCID)
+bool CCryFactoryRegistryImpl::GetInsertionPos(ICryFactory* pFactory, FactoriesByCIDIt& itPosForCID)
 {
 	assert(pFactory);
 
@@ -138,17 +113,11 @@ bool CCryFactoryRegistryImpl::GetInsertionPos(ICryFactory* pFactory, FactoriesBy
 		}
 	};
 
-	FactoryByCName searchByCName(pFactory);
-	FactoriesByCNameIt itForCName = std::lower_bound(m_byCName.begin(), m_byCName.end(), searchByCName);
-	if (itForCName != m_byCName.end() && !(searchByCName < *itForCName))
-		FatalError::Report((*itForCName).m_ptr, pFactory);
-
 	FactoryByCID searchByCID(pFactory);
 	FactoriesByCIDIt itForCID = std::lower_bound(m_byCID.begin(), m_byCID.end(), searchByCID);
 	if (itForCID != m_byCID.end() && !(searchByCID < *itForCID))
-		FatalError::Report((*itForCName).m_ptr, pFactory);
+		FatalError::Report((*itForCID).m_ptr, pFactory);
 
-	itPosForCName = itForCName;
 	itPosForCID = itForCID;
 
 	return true;
@@ -181,7 +150,6 @@ void CCryFactoryRegistryImpl::RegisterFactories(const SRegFactoryNode* pFactorie
 	{
 		AUTO_MODIFYLOCK(m_guard);
 
-		m_byCName.reserve(m_byCName.size() + numFactoriesToAdd);
 		m_byCID.reserve(m_byCID.size() + numFactoriesToAdd);
 		m_byIID.reserve(m_byIID.size() + numInterfacesSupported);
 
@@ -192,11 +160,9 @@ void CCryFactoryRegistryImpl::RegisterFactories(const SRegFactoryNode* pFactorie
 			ICryFactory* pFactory = p->m_pFactory;
 			if (pFactory)
 			{
-				FactoriesByCNameIt itPosForCName;
 				FactoriesByCIDIt itPosForCID;
-				if (GetInsertionPos(pFactory, itPosForCName, itPosForCID))
+				if (GetInsertionPos(pFactory, itPosForCID))
 				{
-					m_byCName.insert(itPosForCName, FactoryByCName(pFactory));
 					m_byCID.insert(itPosForCID, FactoryByCID(pFactory));
 
 					const CryInterfaceID* pIIDs = 0;
@@ -248,15 +214,6 @@ void CCryFactoryRegistryImpl::UnregisterFactoryInternal(ICryFactory* const pFact
 {
 	if (pFactory)
 	{
-		FactoryByCName searchByCName(pFactory);
-		FactoriesByCNameIt itForCName = std::lower_bound(m_byCName.begin(), m_byCName.end(), searchByCName);
-		if (itForCName != m_byCName.end() && !(searchByCName < *itForCName))
-		{
-			assert((*itForCName).m_ptr == pFactory);
-			if ((*itForCName).m_ptr == pFactory)
-				m_byCName.erase(itForCName);
-		}
-
 		FactoryByCID searchByCID(pFactory);
 		FactoriesByCIDIt itForCID = std::lower_bound(m_byCID.begin(), m_byCID.end(), searchByCID);
 		if (itForCID != m_byCID.end() && !(searchByCID < *itForCID))

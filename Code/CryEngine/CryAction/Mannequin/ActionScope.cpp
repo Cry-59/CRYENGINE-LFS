@@ -861,13 +861,10 @@ void CActionScope::InstallProceduralClip(const SProceduralEntry& proc, int layer
 
 		if (procSeq.proceduralClip)
 		{
-			const char* contextName = procSeq.proceduralClip->GetContextName();
+			const CryClassID& contextId = procSeq.proceduralClip->GetContextID();
 
-			if (contextName)
-			{
-				IProceduralContext* context = m_actionController.FindOrCreateProceduralContext(contextName);
-				procSeq.proceduralClip->SetContext(context);
-			}
+			IProceduralContext* context = m_actionController.FindOrCreateProceduralContext(contextId);
+			procSeq.proceduralClip->SetContext(context);
 
 			IEntity* pEntity = gEnv->pEntitySystem->GetEntity(GetEntityId()); // TODO: Handle invalid entity!
 			procSeq.proceduralClip->Initialise(*pEntity, *GetCharInst(), *this, *m_pAction);

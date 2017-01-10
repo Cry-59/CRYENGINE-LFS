@@ -56,3 +56,9 @@ inline bool Serialize(Serialization::IArchive& ar, IAnimEventPlayerPtr& pointer,
 	Serialization::CryExtensionSharedPtr<IAnimEventPlayer, IAnimEventPlayer> serializer(pointer);
 	return ar(static_cast<Serialization::IPointer&>(serializer), name, label);
 }
+
+// Game-specific anim event player, will be automatically found by the character tool
+struct IAnimEventPlayerGame : public IAnimEventPlayer
+{
+	CRYINTERFACE_DECLARE(IAnimEventPlayerGame, 0x3218AD9C82374C5F, 0x8B6487BDEDAF1C4A);
+};

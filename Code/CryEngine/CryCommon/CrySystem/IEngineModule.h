@@ -15,8 +15,6 @@
 
 #include <CryExtension/ICryUnknown.h>
 
-struct SSystemInitParams;
-
 //! Base Interface for all engine module extensions.
 struct IEngineModule : public ICryUnknown
 {
@@ -30,7 +28,7 @@ struct IEngineModule : public ICryUnknown
 	virtual const char* GetCategory() = 0;
 
 	//! This is called to initialize the new module.
-	virtual bool Initialize(SSystemGlobalEnvironment& env, const SSystemInitParams& initParams) = 0;
+	virtual bool Initialize(struct SSystemGlobalEnvironment& env, const struct SSystemInitParams& initParams) = 0;
 	// </interfuscator:shuffle>
 };
 

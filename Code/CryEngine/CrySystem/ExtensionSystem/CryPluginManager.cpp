@@ -3,52 +3,63 @@
 #include "StdAfx.h"
 #include "CryPluginManager.h"
 
+#include "System.h"
+
 #include <CryExtension/ICryFactory.h>
 #include <CryExtension/ICryFactoryRegistry.h>
 #include <CryExtension/CryCreateClassInstance.h>
 
 #include <CryMono/IMonoRuntime.h>
 
+#include <CryCore/Platform/CryLibrary.h>
+
 CCryPluginManager* CCryPluginManager::s_pThis = 0;
 
-// Descriptor for the binary file of a plugin.
+// Descriptor for the C++ binary file of a plugin.
 // This is separate since a plugin does not necessarily have to come from a binary, for example if static linking is used.
-struct SPluginModule
+struct SNativePluginModule
 {
-	SPluginModule() {}
+	SNativePluginModule() {}
 
-	SPluginModule(const char* path, const char* className)
+	SNativePluginModule(const char* path)
 		: m_engineModulePath(path)
-		, m_className(className)
 	{
-		GetISystem()->InitializeEngineModule(path, className, false);
+		MEMSTAT_CONTEXT(EMemStatContextTypes::MSC_Other, 0, "LoadPlugin");
+		MEMSTAT_CONTEXT_FMT(EMemStatContextTypes::MSC_Other, 0, "%s", path);
+
+		m_pFactory = gEnv->pSystem->LoadModuleWithFactory(path, cryiidof<ICryPlugin>());
+
+		if (m_pFactory == nullptr)
+		{
+			CryWarning(VALIDATOR_MODULE_SYSTEM, VALIDATOR_ERROR, "Plugin load failed - valid ICryPlugin implementation was not found in plugin %s!", path);
+
+			MarkUnloaded();
+			return;
+		}
 	}
 
-	SPluginModule(SPluginModule& other)
+	SNativePluginModule(SNativePluginModule& other)
 	{
 		m_engineModulePath = other.m_engineModulePath;
-		m_className = other.m_className;
-
-		other.Clear();
+		
+		other.MarkUnloaded();
 	}
 
-	SPluginModule(SPluginModule&& other)
+	SNativePluginModule(SNativePluginModule&& other)
 	{
 		m_engineModulePath = other.m_engineModulePath;
-		m_className = other.m_className;
-
-		other.Clear();
+		
+		other.MarkUnloaded();
 	}
 
-	SPluginModule& operator=(const SPluginModule&& other)
+	SNativePluginModule& operator=(const SNativePluginModule&& other)
 	{
 		m_engineModulePath = other.m_engineModulePath;
-		m_className = other.m_className;
-
+		
 		return *this;
 	}
 
-	~SPluginModule()
+	~SNativePluginModule()
 	{
 		Shutdown();
 	}
@@ -58,28 +69,36 @@ struct SPluginModule
 		bool bSuccess = false;
 		if (m_engineModulePath.size() > 0)
 		{
-			bSuccess = GetISystem()->UnloadEngineModule(m_engineModulePath, m_className);
+			bSuccess = GetISystem()->UnloadEngineModule(m_engineModulePath);
 
 			// Prevent Shutdown twice
-			m_engineModulePath.clear();
+			MarkUnloaded();
 		}
 
 		return bSuccess;
 	}
 
-	void Clear()
+	void MarkUnloaded()
 	{
 		m_engineModulePath.clear();
 	}
 
+	bool IsLoaded()
+	{
+		return m_engineModulePath.size() > 0;
+	}
+
+	ICryFactory* GetFactory() const { return m_pFactory; }
+
+protected:
 	string m_engineModulePath;
-	string m_className;
+	ICryFactory* m_pFactory;
 };
 
 struct SPluginContainer
 {
 	// Constructor for native plug-ins
-	SPluginContainer(const std::shared_ptr<ICryPlugin>& plugin, SPluginModule&& module)
+	SPluginContainer(const std::shared_ptr<ICryPlugin>& plugin, SNativePluginModule&& module)
 		: m_pPlugin(plugin)
 		, m_module(module)
 		, m_pluginClassId(plugin->GetFactory()->GetClassID())
@@ -133,15 +152,8 @@ struct SPluginContainer
 
 	std::shared_ptr<ICryPlugin>    m_pPlugin;
 
-	SPluginModule                  m_module;
+	SNativePluginModule            m_module;
 };
-
-void CCryPluginManager::ReloadPluginCmd(IConsoleCmdArgs* pArgs)
-{
-	s_pThis->UnloadAllPlugins();
-	s_pThis->LoadExtensionFile("cryplugin.csv");
-	s_pThis->OnSystemEvent(ESYSTEM_EVENT_GAME_POST_INIT_DONE, 0, 0);
-}
 
 CCryPluginManager::CCryPluginManager(const SSystemInitParams& initParams)
 	: m_systemInitParams(initParams)
@@ -181,21 +193,15 @@ void CCryPluginManager::OnSystemEvent(ESystemEvent event, UINT_PTR wparam, UINT_
 	}
 }
 
-bool CCryPluginManager::Initialize()
+void CCryPluginManager::Initialize()
 {
-#ifndef _RELEASE
-	REGISTER_COMMAND("sys_reload_plugin", ReloadPluginCmd, 0, "Reload a plugin - not implemented yet");
-#endif
-
 	// Start with loading the default engine plug-ins
-	LoadPluginFromDisk(EPluginType::EPluginType_CPP, "CryDefaultEntities", "Plugin_CryDefaultEntities");
+	LoadPluginFromDisk(EPluginType::EPluginType_CPP, "CryDefaultEntities");
 	//Schematyc + Schematyc Standard Enviroment
-	LoadPluginFromDisk(EPluginType::EPluginType_CPP, "CrySchematycCore", "Plugin_SchematycCore");
-	LoadPluginFromDisk(EPluginType::EPluginType_CPP, "CrySchematycSTDEnv", "Plugin_SchematycSTDEnv");
+	LoadPluginFromDisk(EPluginType::EPluginType_CPP, "CrySchematycCore");
+	LoadPluginFromDisk(EPluginType::EPluginType_CPP, "CrySchematycSTDEnv");
 
-	LoadPluginFromDisk(EPluginType::EPluginType_CPP, "CrySensorSystem", "Plugin_CrySensorSystem");
-
-	return LoadExtensionFile("cryplugin.csv");
+	LoadPluginFromDisk(EPluginType::EPluginType_CPP, "CrySensorSystem");
 }
 
 //--- UTF8 parse helper routines
@@ -229,75 +235,7 @@ static bool Parser_StrEquals(const char* pStart, const char* pEnd, const char* s
 	return (klen == pEnd - pStart) && memcmp(pStart, szKey, klen) == 0;
 }
 
-//---
-
-bool CCryPluginManager::LoadExtensionFile(const char* szFilename)
-{
-	CryLogAlways("Loading extension file %s", szFilename);
-
-	CRY_ASSERT(szFilename != nullptr);
-	bool bResult = true;
-
-	ICryPak* pCryPak = gEnv->pCryPak;
-	FILE* pFile = pCryPak->FOpen(szFilename, "rb", ICryPak::FLAGS_PATH_REAL);
-	if (pFile == nullptr)
-		return bResult;
-
-	size_t iFileSize = pCryPak->FGetSize(pFile);
-	char* pBuffer = new char[iFileSize];
-	pCryPak->FReadRawAll(pBuffer, iFileSize, pFile);
-	pCryPak->FClose(pFile);
-
-	const char* pTokenStart = pBuffer;
-	const char* pBufferEnd = pBuffer + iFileSize;
-	while (pTokenStart != pBufferEnd)
-	{
-		const char* pNewline = Parser_StrChr(pTokenStart, pBufferEnd, '\n');
-		const char* pSemicolon = Parser_StrChr(pTokenStart, pNewline, ';');
-
-		auto pluginType = ICryPluginManager::EPluginType::EPluginType_CPP;
-		if (Parser_StrEquals(pTokenStart, pSemicolon, "C#"))
-			pluginType = ICryPluginManager::EPluginType::EPluginType_CS;
-
-		// Parsing of plugin name
-		// Not actually used anymore, but no need to break existing setup seeing as we're going to move away from csv soon anyway - Filip
-		pTokenStart = Parser_NextChar(pSemicolon, pNewline);
-		pSemicolon = Parser_StrChr(pTokenStart, pNewline, ';');
-
-		pTokenStart = Parser_NextChar(pSemicolon, pNewline);
-		pSemicolon = Parser_StrChr(pTokenStart, pNewline, ';');
-
-		string pluginClassName;
-		pluginClassName.assign(pTokenStart, pSemicolon - pTokenStart);
-		pluginClassName.Trim();
-
-		pTokenStart = Parser_NextChar(pSemicolon, pNewline);
-		pSemicolon = Parser_StrChr(pTokenStart, pNewline, ';');
-
-		string pluginBinaryPath;
-		pluginBinaryPath.assign(pTokenStart, pSemicolon - pTokenStart);
-		pluginBinaryPath.Trim();
-
-		pTokenStart = Parser_NextChar(pSemicolon, pNewline);
-		pSemicolon = Parser_StrChr(pTokenStart, pNewline, ';');
-
-		string pluginAssetDirectory;
-		pluginAssetDirectory.assign(pTokenStart, pSemicolon - pTokenStart);
-		pluginAssetDirectory.Trim();
-	#pragma message("TODO: Use plugin asset directory")
-
-		pTokenStart = Parser_NextChar(pNewline, pBufferEnd);
-		if (!LoadPluginFromDisk(pluginType, pluginBinaryPath, pluginClassName))
-		{
-			bResult = false;
-		}
-	}
-
-	delete[](pBuffer);
-	return bResult;
-}
-
-bool CCryPluginManager::LoadPluginFromDisk(EPluginType type, const char* path, const char* className)
+bool CCryPluginManager::LoadPluginFromDisk(EPluginType type, const char* path)
 {
 	CryLogAlways("Loading plugin %s", path);
 
@@ -309,34 +247,18 @@ bool CCryPluginManager::LoadPluginFromDisk(EPluginType type, const char* path, c
 		{
 			// Load the module, note that this calls ISystem::InitializeEngineModule
 			// Automatically unloads in destructor
-			SPluginModule module(path, className);
+			SNativePluginModule module(path);
 
-			ICryFactoryRegistry* pFactoryReg = gEnv->pSystem->GetCryFactoryRegistry();
-			CRY_ASSERT(pFactoryReg);
-
-			ICryFactory* pFactory = pFactoryReg->GetFactory(className);
-			if (pFactory == nullptr)
-			{
-				CryWarning(VALIDATOR_MODULE_SYSTEM, VALIDATOR_ERROR, "Plugin load failed - Factory %s was not found in plugin %s!", className, path);
-				return false;
-			}
-			
-			if (!pFactory->ClassSupports(cryiidof<ICryPlugin>()))
-			{
-				CryWarning(VALIDATOR_MODULE_SYSTEM, VALIDATOR_ERROR, "Plugin load failed - Factory %s did not implement ICryPlugin in plugin %s!", className, path);
-				return false;
-			}
-
-			ICryUnknownPtr pUnk = pFactory->CreateClassInstance();
+			ICryUnknownPtr pUnk = module.GetFactory()->CreateClassInstance();
 			pPlugin = cryinterface_cast<ICryPlugin>(pUnk);
 			if (!pPlugin)
 			{
-				CryWarning(VALIDATOR_MODULE_SYSTEM, VALIDATOR_ERROR, "Plugin load failed - Could not create an instance of %s in plugin %s!", className, path);
+				CryWarning(VALIDATOR_MODULE_SYSTEM, VALIDATOR_ERROR, "Plugin load failed - Could not create an instance of %s in plugin %s!", module.GetFactory()->GetName(), path);
 				return false;
 			}
 
 			m_pluginContainer.emplace_back(pPlugin, std::move(module));
-			module.Clear();
+			module.MarkUnloaded();
 
 			break;
 		}
@@ -367,9 +289,8 @@ bool CCryPluginManager::LoadPluginFromDisk(EPluginType type, const char* path, c
 
 	if (!containedPlugin.Initialize(*gEnv, m_systemInitParams))
 	{
-		CryWarning(VALIDATOR_MODULE_SYSTEM, VALIDATOR_ERROR, "Plugin load failed - Failed to initialize %s in plugin %s!", className, path);
+		CryWarning(VALIDATOR_MODULE_SYSTEM, VALIDATOR_ERROR, "Plugin load failed - Failed to initialize plugin %s!", path);
 
-		containedPlugin.Shutdown();
 		m_pluginContainer.pop_back();
 
 		return false;

@@ -928,7 +928,7 @@ bool CGame::Init(/*IGameFramework* pFramework*/)
 		}
 #endif
 
-		if (!gEnv->pSystem->InitializeEngineModule("CryLobby", "EngineModule_CryLobby", false))
+		if (!gEnv->pSystem->InitializeEngineModule("CryLobby", cryiidof<ILobbyEngineModule>(), false))
 		{
 			CryWarning(VALIDATOR_MODULE_GAME, VALIDATOR_ERROR, "Error creating Lobby System!");
 		}

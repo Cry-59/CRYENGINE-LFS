@@ -5,6 +5,8 @@
 #include "IAudioInterfacesCommonData.h"
 #include <CryCore/Platform/platform.h>
 
+#include <CrySystem/IEngineModule.h>
+
 // General macros.
 //#define ENABLE_AUDIO_PORT_MESSAGES
 
@@ -809,6 +811,16 @@ struct IAudioProxy
 	virtual void             SetCurrentEnvironments(EntityId const entityToIgnore = 0) = 0;
 	virtual CATLAudioObject* GetAudioObject() const = 0;
 	// </interfuscator:shuffle>
+};
+
+struct IAudioSystemEngineModule : public IEngineModule
+{
+	CRYINTERFACE_DECLARE(IAudioSystemEngineModule, 0x6C7BA422375B4325, 0xAE00918679610D2E);
+};
+
+struct IAudioSystemImplementationModule : public IEngineModule
+{
+	CRYINTERFACE_DECLARE(IAudioSystemImplementationModule, 0x5C4ADBECA34349CE, 0xB7992A856CDD553B);
 };
 
 //////////////////////////////////////////////////////////////////////////

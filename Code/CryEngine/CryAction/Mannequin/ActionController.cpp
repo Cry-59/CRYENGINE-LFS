@@ -2192,50 +2192,42 @@ void CActionController::GetStateString(string& state) const
 
 #endif //!_RELEASE
 
-IProceduralContext* CActionController::FindOrCreateProceduralContext(const char* contextName)
+IProceduralContext* CActionController::FindOrCreateProceduralContext(const CryClassID& contextId)
 {
-	IProceduralContext* procContext = FindProceduralContext(contextName);
+	IProceduralContext* procContext = FindProceduralContext(contextId);
 	if (procContext)
 		return procContext;
 
-	return CreateProceduralContext(contextName);
+	return CreateProceduralContext(contextId);
 }
 
-IProceduralContext* CActionController::CreateProceduralContext(const char* contextName)
+IProceduralContext* CActionController::CreateProceduralContext(const CryClassID& contextId)
 {
 	const bool hasValidRootEntity = UpdateRootEntityValidity();
 	if (!hasValidRootEntity)
 		return NULL;
 
-	const uint32 contextNameCRC = CCrc32::ComputeLowercase(contextName);
-
 	SProcContext newProcContext;
-	newProcContext.nameCRC = contextNameCRC;
-	CryCreateClassInstance<IProceduralContext>(contextName, newProcContext.pContext);
+	newProcContext.contextId = contextId;
+	CryCreateClassInstance<IProceduralContext>(contextId, newProcContext.pContext);
 	m_procContexts.push_back(newProcContext);
 
 	newProcContext.pContext->Initialise(*m_cachedEntity, *this);
 	return newProcContext.pContext.get();
 }
 
-const IProceduralContext* CActionController::FindProceduralContext(const char* contextName) const
+IProceduralContext* CActionController::FindProceduralContext(const CryClassID& contextId)
 {
-	const uint32 contextNameCRC = CCrc32::ComputeLowercase(contextName);
-	return FindProceduralContext(contextNameCRC);
+	return FindProceduralContext(contextId);
 }
 
-IProceduralContext* CActionController::FindProceduralContext(const char* contextName)
-{
-	const uint32 contextNameCRC = CCrc32::ComputeLowercase(contextName);
-	return FindProceduralContext(contextNameCRC);
-}
-
-IProceduralContext* CActionController::FindProceduralContext(const uint32 contextNameCRC) const
+IProceduralContext* CActionController::FindProceduralContext(const CryClassID& contextId) const
 {
 	const uint32 numContexts = m_procContexts.size();
 	for (uint32 i = 0; i < numContexts; i++)
 	{
-		if (m_procContexts[i].nameCRC == contextNameCRC)
+		if (m_procContexts[i].contextId.hipart == contextId.hipart
+			&& m_procContexts[i].contextId.lopart == contextId.lopart)
 		{
 			return m_procContexts[i].pContext.get();
 		}

@@ -7733,9 +7733,13 @@ extern "C" DLL_EXPORT IRenderer * CreateCryRenderInterface(ISystem * pSystem)
 	return gRenDev;
 }
 
-class CEngineModule_CryRenderer : public IEngineModule
+class CEngineModule_CryRenderer : public IRendererEngineModule
 {
-	CRYINTERFACE_SIMPLE(IEngineModule)
+	CRYINTERFACE_BEGIN()
+		CRYINTERFACE_ADD(IEngineModule)
+		CRYINTERFACE_ADD(IRendererEngineModule)
+	CRYINTERFACE_END()
+
 	CRYGENERATE_SINGLETONCLASS(CEngineModule_CryRenderer, "EngineModule_CryRenderer", 0x540c91a7338e41d3, 0xaceeac9d55614450)
 
 	virtual ~CEngineModule_CryRenderer() {}

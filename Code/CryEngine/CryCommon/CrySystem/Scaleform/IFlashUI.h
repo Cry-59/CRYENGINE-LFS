@@ -10,8 +10,6 @@
 #include <CryString/CryName.h>
 #include <CryCore/functor.h>
 
-#define IFlashUIExtensionName "FlashUI"
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////// UI variant data /////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1698,9 +1696,9 @@ struct IUIModule
 
 struct IFlashUI : public ICryUnknown
 {
+public:
 	CRYINTERFACE_DECLARE(IFlashUI, 0xE1161004DA5B4F04, 0x9DFF8FC0EACE3BD4);
 
-public:
 	//! Init the Flash UI system.
 	virtual void Init() = 0;
 	virtual bool PostInit() = 0;
@@ -1822,7 +1820,7 @@ static IFlashUIPtr GetIFlashUIPtr()
 {
 	IFlashUIPtr pFlashUI;
 	if (gEnv && gEnv->pSystem)
-		CryCreateClassInstance(IFlashUIExtensionName, pFlashUI);
+		CryCreateClassInstanceForInterface<IFlashUI>(cryiidof<IFlashUI>(), pFlashUI);
 	return pFlashUI;
 }
 

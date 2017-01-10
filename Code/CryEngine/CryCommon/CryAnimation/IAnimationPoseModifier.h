@@ -351,4 +351,9 @@ struct IAnimationPoseAligner :
 
 DECLARE_SHARED_POINTERS(IAnimationPoseAligner);
 
+struct IAnimationPoseModifierTorsoAim : public IAnimationPoseModifier
+{
+	CRYINTERFACE_DECLARE(IAnimationPoseModifierTorsoAim, 0x388374EADDF849BA, 0xB8B75DFD824B2C3A);
+};
+
 #endif // AnimationPoseModifier_h

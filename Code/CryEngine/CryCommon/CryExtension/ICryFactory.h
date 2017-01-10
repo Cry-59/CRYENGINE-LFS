@@ -27,7 +27,6 @@ struct ICryFactory
 	virtual const CryClassID&      GetClassID() const = 0;
 	virtual bool                   ClassSupports(const CryInterfaceID& iid) const = 0;
 	virtual void                   ClassSupports(const CryInterfaceID*& pIIDs, size_t& numIIDs) const = 0;
-	virtual const SRegFactoryNode* GetRegFactoryNode() const = 0;
 	virtual ICryUnknownPtr         CreateClassInstance() const = 0;
 
 protected:

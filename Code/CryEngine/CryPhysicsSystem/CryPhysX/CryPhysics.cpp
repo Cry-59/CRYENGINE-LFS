@@ -54,13 +54,17 @@ CRYPHYSICS_API IPhysicalWorld *CreatePhysicalWorld(ISystem *pSystem)
 
 #ifndef STANDALONE_PHYSICS
 //////////////////////////////////////////////////////////////////////////
-class CEngineModule_CryPhysics : public IEngineModule
+class CEngineModule_CryPhysics : public IPhysicsEngineModule
 {
-	CRYINTERFACE_SIMPLE(IEngineModule)
-		CRYGENERATE_SINGLETONCLASS(CEngineModule_CryPhysics, "EngineModule_CryPhysics", 0x526cabf3d776407f, 0xaa2338545bb6ae7f)
+	CRYINTERFACE_BEGIN()
+		CRYINTERFACE_ADD(IEngineModule)
+		CRYINTERFACE_ADD(IPhysicsEngineModule)
+	CRYINTERFACE_END()
 
-		//////////////////////////////////////////////////////////////////////////
-		virtual const char *GetName() override { return "CryPhysics"; };
+	CRYGENERATE_SINGLETONCLASS(CEngineModule_CryPhysics, "EngineModule_CryPhysics", 0x526cabf3d776407f, 0xaa2338545bb6ae7f)
+
+	//////////////////////////////////////////////////////////////////////////
+	virtual const char *GetName() override { return "CryPhysics"; };
 	virtual const char *GetCategory() override { return "CryEngine"; };
 
 	//////////////////////////////////////////////////////////////////////////

@@ -22,6 +22,7 @@
 #include <CrySystem/ISystemScheduler.h> // <> required for Interfuscator
 
 #include <CryMath/LCGRandom.h>
+#include <CryExtension/CryTypeID.h>
 
 struct ISystem;
 struct ILog;
@@ -799,7 +800,6 @@ struct SSystemGlobalEnvironment
 	IDialogSystem*               pDialogSystem;
 	I3DEngine*                   p3DEngine;
 	INetwork*                    pNetwork;
-	IOnline*                     pOnline;
 	ICryLobby*                   pLobby;
 	IScriptSystem*               pScriptSystem;
 	IPhysicalWorld*              pPhysicalWorld;
@@ -1552,12 +1552,14 @@ struct ISystem
 	//! Initializes Steam if needed and returns if it was successful.
 	virtual bool SteamInit() = 0;
 
+	//! Loads a dynamic library and returns the first factory with the specified interface id contained inside the module
+	virtual struct ICryFactory* LoadModuleWithFactory(const char* dllName, const CryInterfaceID& moduleInterfaceId) = 0;
+
 	//! Loads a dynamic library, creates and initializes an instance of the module class
-	//! \note HintEaaS is used to load EaaS release configuration, it's ignored in all other configurations; pass true if the sourcecode for the module is available to EaaS users.
-	virtual bool InitializeEngineModule(const char* dllName, const char* moduleClassName, bool bQuitIfNotFound) = 0;
+	virtual bool InitializeEngineModule(const char* dllName, const CryInterfaceID& moduleInterfaceId, bool bQuitIfNotFound) = 0;
 
 	//! Unloads a dynamic library as well as the corresponding instance of the module class
-	virtual bool UnloadEngineModule(const char* dllName, const char* moduleClassName) = 0;
+	virtual bool UnloadEngineModule(const char* dllName) = 0;
 
 	//! Gets the root window message handler function.
 	//! The returned pointer is platform-specific: for Windows OS, the pointer is of type WNDPROC
@@ -2139,3 +2141,11 @@ CRY_ASYNC_MEMCPY_API void cryAsyncMemcpy(
 #endif
 
 #include <CrySystem/Profilers/FrameProfiler/FrameProfiler.h>
+
+CryGUID CryGUID::Create()
+{
+	CryGUID guid;
+	gEnv->pSystem->FillRandomMT(reinterpret_cast<uint32*>(&guid), sizeof(guid) / sizeof(uint32));
+	MEMORY_RW_REORDERING_BARRIER;
+	return guid;
+}
