@@ -52,6 +52,9 @@ add_sources("CryDefaultEntities_uber_0.cpp"
 	SOURCE_GROUP "Triggers"
 		"Triggers/TriggerEntity.cpp"
 		"Triggers/TriggerEntity.h"
+	SOURCE_GROUP "Network"
+		"Network/PhysicsSyncComponent.cpp"
+		"Network/PhysicsSyncComponent.h"
 )
 
 add_sources("NoUberFile"
