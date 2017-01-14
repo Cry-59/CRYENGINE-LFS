@@ -21,7 +21,7 @@ struct IActionButton
 	virtual IActionButtonPtr Clone() const = 0;
 };
 
-typedef Functor0 FunctorActionButtonCallback;
+typedef std::function<void()> FunctorActionButtonCallback;
 
 struct FunctorActionButton : public IActionButton
 {

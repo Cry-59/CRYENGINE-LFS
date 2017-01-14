@@ -10,7 +10,7 @@
 #include "ImplementationManager.h"
 #include <CrySerialization/StringList.h>
 #include <CrySerialization/Decorators/Range.h>
-#include <Serialization/Decorators/EditorActionButton.h>
+#include <CrySerialization/Decorators/ActionButton.h>
 #include <Serialization/Decorators/ToggleButton.h>
 #include <CryMath/Cry_Geo.h>
 #include <Util/Math.h>

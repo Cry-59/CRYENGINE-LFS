@@ -41,6 +41,7 @@
 #include "ClipVolumeProxy.h"
 #include "DynamicResponseProxy.h"
 #include <CryExtension/CryCreateClassInstance.h>
+#include <CrySerialization/Decorators/ActionButton.h>
 
 // enable this to check nan's on position updates... useful for debugging some weird crashes
 #define ENABLE_NAN_CHECK
@@ -1242,12 +1243,14 @@ void CEntity::SerializeXML(XmlNodeRef& node, bool bLoading, bool bIncludeScriptP
 //////////////////////////////////////////////////////////////////////////
 void CEntity::SerializeProperties(Serialization::IArchive& ar)
 {
-	m_components.ForEach([&ar](const SEntityComponentRecord& componentRecord)
+	m_components.ForEach([&ar, this](const SEntityComponentRecord& componentRecord)
 	{
 		IEntityPropertyGroup* pProperties = componentRecord.pComponent->GetPropertyGroup();
 
 		if ((componentRecord.name.size() > 0 || pProperties != nullptr) && ar.openBlock("Component", componentRecord.name))
 		{
+			ar(Serialization::ActionButton([this, &componentRecord] { RemoveComponent(componentRecord.pComponent.get()); }, "icons:General/Element_Clear.ico"), "remove_component", "^Remove");
+
 			// Parse component properties, if any
 			if (pProperties != nullptr)
 			{
