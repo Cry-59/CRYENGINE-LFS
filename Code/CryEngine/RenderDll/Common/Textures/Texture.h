@@ -2011,7 +2011,7 @@ public:
 		CTexture* pTex = GetByID(nID);
 		assert(pTex);
 		if (pTex)
-			pTex->Apply(nTUnit, nState, -1, nSUnit);
+			pTex->Apply(nTUnit, nState, EFTT_UNKNOWN, nSUnit);
 	}
 
 	static const CCryNameTSCRC& mfGetClassName();
