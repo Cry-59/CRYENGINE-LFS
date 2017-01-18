@@ -1432,9 +1432,17 @@ IEntityComponent* CEntity::QueryComponentByTypeId(const CryInterfaceID& interfac
 {
 	for (auto& componentRecord : m_components.GetVector())
 	{
-		if (componentRecord.pComponent->GetFactory()->ClassSupports(interfaceID))
+		if (componentRecord.pComponent == nullptr)
 		{
-			return componentRecord.pComponent.get();
+			continue;
+		}
+
+		if (ICryFactory* pFactory = componentRecord.pComponent->GetFactory())
+		{
+			if (pFactory->ClassSupports(interfaceID))
+			{
+				return componentRecord.pComponent.get();
+			}
 		}
 	}
 	return nullptr;
