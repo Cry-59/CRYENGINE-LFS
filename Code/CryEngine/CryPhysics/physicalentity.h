@@ -300,7 +300,7 @@ public:
 	void UpdatePartIdmatBreakable(int ipart, int nParts=-1);
 	int CapsulizePart(int ipart);
 
-	int GetMatId(int id,int ipart) {
+	virtual int GetMatId(int id,int ipart) {
 		if (ipart<m_nParts) {
 			id += m_parts[ipart].surface_idx-id & id>>31;
 			intptr_t mask = iszero_mask(m_parts[ipart].pMatMapping);

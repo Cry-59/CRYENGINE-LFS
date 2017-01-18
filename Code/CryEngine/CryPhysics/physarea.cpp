@@ -58,6 +58,8 @@ public:
 	virtual void StepBack(float time_interval) {}
 	virtual IPhysicalWorld *GetWorld() const { return 0; }
 
+	virtual int             GetMatId(int id, int ipart) { return 0; }
+
 	virtual void GetMemoryStatistics(ICrySizer *pSizer) const {}
 };
 CPhysicalStub g_stub;

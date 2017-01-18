@@ -219,3 +219,7 @@ void CPhysicalPlaceholder::StartStep(float time_interval) {
 void CPhysicalPlaceholder::StepBack(float time_interval) { 
 	return GetEntity()->StepBack(time_interval); 
 }
+
+int CPhysicalPlaceholder::GetMatId(int id, int ipart) {
+	return GetEntity()->GetMatId(id, ipart);
+}

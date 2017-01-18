@@ -83,6 +83,8 @@ public:
 	virtual void StepBack(float time_interval);
 	virtual IPhysicalWorld *GetWorld() const;
 
+	virtual int             GetMatId(int id, int ipart);
+
 	virtual void GetMemoryStatistics(ICrySizer *pSizer) const {};
 
 	Vec3 m_BBox[2];

@@ -2661,6 +2661,8 @@ struct IPhysicalEntity
 	virtual void            StepBack(float time_interval) = 0;
 	virtual IPhysicalWorld* GetWorld() const = 0; //!< returns physical world this entity belongs to
 
+	virtual int             GetMatId(int id, int ipart) = 0;
+
 	virtual void            GetMemoryStatistics(ICrySizer* pSizer) const = 0;
 	// </interfuscator:shuffle>
 };
