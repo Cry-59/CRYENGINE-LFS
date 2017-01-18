@@ -208,6 +208,7 @@ public:
 	virtual IEntityComponent* AddComponent(CryInterfaceID typeId, std::shared_ptr<IEntityComponent> pComponent,bool bAllowDuplicate) final;
 	virtual void              RemoveComponent(IEntityComponent* pComponent) final;
 	virtual IEntityComponent* GetComponentByTypeId(const CryInterfaceID& interfaceID) const final;
+	virtual IEntityComponent* QueryComponentByTypeId(const CryInterfaceID& interfaceID) const final;
 
 	virtual void CloneComponentsFrom(IEntity& otherEntity) final;
 

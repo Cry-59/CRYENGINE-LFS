@@ -1024,6 +1024,9 @@ public:
 	//! \param interfaceID Identifier for the component interface.
 	virtual IEntityComponent* GetComponentByTypeId(const CryInterfaceID& interfaceID) const = 0;
 
+	//! Return first component that supports the specified interface ID.
+	virtual IEntityComponent* QueryComponentByTypeId(const CryInterfaceID& interfaceID) const = 0;
+
 	//! Get existing or Create a new initialized component inside the entity.
 	template<typename ComponentType>
 	ComponentType* GetOrCreateComponent();
@@ -1043,16 +1046,25 @@ public:
 	template<typename ComponentClass>
 	ComponentClass* CreateComponentClass(bool bAllowDuplicate=false);
 
-	//! Helper template function to simplify querying components
+	//! Helper template function to simplify getting components
 	//! ex: auto pScriptProxy = pEntity->GetComponent<IEntityScriptComponent>();
 	template<typename ComponentType>
-	ComponentType* GetComponent() const 
+	ComponentType* GetComponent() const
 	{
 		//static_assert(IEntityComponent::IsDeclared<ComponentType>::Check, "Tried to query component  that was not declared with CRY_ENTITY_COMPONENT_INTERFACE, CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS or CRY_ENTITY_COMPONENT_CLASS!");
 
-		return static_cast<ComponentType*>(GetComponentByTypeId(cryiidof<ComponentType>())); 
+		return static_cast<ComponentType*>(GetComponentByTypeId(cryiidof<ComponentType>()));
 	}
 
+	//! Helper template function to simplify query components
+	//! ex: auto pScriptProxy = pEntity->QueryComponent<IEntityScriptComponent>();
+	template<typename ComponentType>
+	ComponentType* QueryComponent() const
+	{
+		//static_assert(IEntityComponent::IsDeclared<ComponentType>::Check, "Tried to query component  that was not declared with CRY_ENTITY_COMPONENT_INTERFACE, CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS or CRY_ENTITY_COMPONENT_CLASS!");
+
+		return static_cast<ComponentType*>(QueryComponentByTypeId(cryiidof<ComponentType>()));
+	}
 
 	//! Creates instances of the components contained in the other entity
 	//! Also copies over properties for all the components created.

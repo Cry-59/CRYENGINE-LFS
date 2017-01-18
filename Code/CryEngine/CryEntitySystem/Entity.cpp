@@ -1428,6 +1428,18 @@ IEntityComponent* CEntity::GetComponentByTypeId(const CryInterfaceID& interfaceI
 	return nullptr;
 }
 
+IEntityComponent* CEntity::QueryComponentByTypeId(const CryInterfaceID& interfaceID) const
+{
+	for (auto& componentRecord : m_components.GetVector())
+	{
+		if (componentRecord.pComponent->GetFactory()->ClassSupports(interfaceID))
+		{
+			return componentRecord.pComponent.get();
+		}
+	}
+	return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////////
 void CEntity::CloneComponentsFrom(IEntity& otherEntity)
 {
