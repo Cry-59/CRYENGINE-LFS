@@ -28,6 +28,8 @@ void CCommentEntity::Initialize()
 	CDesignerEntityComponent::Initialize();
 
 	m_pEnableCommentsVar = gEnv->pConsole->GetCVar("cl_comment");
+
+	m_pEntity->Activate(true);
 }
 
 void CCommentEntity::ProcessEvent(SEntityEvent& event)
