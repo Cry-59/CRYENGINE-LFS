@@ -84,6 +84,11 @@ int CPhysicsEventListener::OnPostStep(const EventPhys* pEvent)
 		if (pPhysProxy)// && pPhysProxy->GetPhysicalEntity())
 			pPhysProxy->OnPhysicsPostStep(pPostStep);
 		pRndNode = (pCEntity->GetEntityRender()) ? pCEntity->GetEntityRender()->GetRenderNode() : nullptr;
+
+		SEntityEvent event(ENTITY_EVENT_PHYS_POSTSTEP);
+		event.fParam[0] = pPostStep->dt;
+		event.nParam[0] = 1;
+		pCEntity->SendEvent(event);
 	}
 	else if (pPostStep->iForeignData == PHYS_FOREIGN_ID_ROPE)
 	{
@@ -94,11 +99,6 @@ int CPhysicsEventListener::OnPostStep(const EventPhys* pEvent)
 		}
 		pRndNode = pRenderNode;
 	}
-
-	SEntityEvent event(ENTITY_EVENT_PHYS_POSTSTEP);
-	event.fParam[0] = pPostStep->dt;
-	event.nParam[0] = 1;
-	pCEntity->SendEvent(event);
 
 	if (pRndNode)
 	{

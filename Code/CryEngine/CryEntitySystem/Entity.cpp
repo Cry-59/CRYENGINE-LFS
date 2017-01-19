@@ -1444,6 +1444,11 @@ IEntityComponent* CEntity::QueryComponentByTypeId(const CryInterfaceID& interfac
 				return componentRecord.pComponent.get();
 			}
 		}
+
+		if (componentRecord.typeId == interfaceID)
+		{
+			return componentRecord.pComponent.get();
+		}
 	}
 	return nullptr;
 }
