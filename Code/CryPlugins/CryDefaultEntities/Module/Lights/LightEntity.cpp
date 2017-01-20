@@ -69,8 +69,6 @@ void CDefaultLightEntity::OnResetState()
 	ActivateFlowNodeOutput(eOutputPorts_Active, TFlowInputData(true));
 
 	m_light.SetPosition(ZERO);
-	m_light.m_fLightFrustumAngle = 45;
-	m_light.m_fProjectorNearPlane = 0;
 	m_light.m_Flags = DLF_DEFERRED_LIGHT | DLF_THIS_AREA_ONLY;
 
 	if (m_bAffectsThisAreaOnly)
@@ -117,7 +115,6 @@ void CDefaultLightEntity::OnResetState()
 
 	m_light.m_nSortPriority = 0;
 	m_light.SetFalloffMax(1.0f);
-	m_light.m_fProjectorNearPlane = 0.f;
 
 	m_light.m_fFogRadialLobe = 0.f;
 
