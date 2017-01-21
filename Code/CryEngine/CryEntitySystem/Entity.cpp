@@ -1243,6 +1243,17 @@ void CEntity::SerializeXML(XmlNodeRef& node, bool bLoading, bool bIncludeScriptP
 //////////////////////////////////////////////////////////////////////////
 void CEntity::SerializeProperties(Serialization::IArchive& ar)
 {
+	if (ar.isEdit() && m_components.Size() > 0)
+	{
+		ar(Serialization::ActionButton([this] 
+		{
+			m_components.Clear();
+			m_bRequiresComponentUpdate = 0;
+
+			ActivateEntityIfNecessary();
+		}, "icons:General/Element_Clear.ico"), "clear_components", "^Clear");
+	}
+
 	int componentId = 0;
 	char guidBuffer[41];
 	guidBuffer[40] = '\0';
