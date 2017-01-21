@@ -1243,21 +1243,31 @@ void CEntity::SerializeXML(XmlNodeRef& node, bool bLoading, bool bIncludeScriptP
 //////////////////////////////////////////////////////////////////////////
 void CEntity::SerializeProperties(Serialization::IArchive& ar)
 {
-	m_components.ForEach([&ar, this](const SEntityComponentRecord& componentRecord)
+	int componentId = 0;
+	char guidBuffer[41];
+	guidBuffer[40] = '\0';
+
+	m_components.ForEach([&ar, &componentId, &guidBuffer, this](const SEntityComponentRecord& componentRecord)
 	{
 		IEntityPropertyGroup* pProperties = componentRecord.pComponent->GetPropertyGroup();
 
-		if ((componentRecord.name.size() > 0 || pProperties != nullptr) && ar.openBlock("Component", componentRecord.name))
+		_ui64toa(componentRecord.typeId.lopart, guidBuffer, 10);
+		_ui64toa(componentRecord.typeId.hipart, guidBuffer + 20, 10);
+		
+		if ((componentRecord.name.size() > 0 || pProperties != nullptr))
 		{
-			ar(Serialization::ActionButton([this, &componentRecord] { RemoveComponent(componentRecord.pComponent.get()); }, "icons:General/Element_Clear.ico"), "remove_component", "^Remove");
-
-			// Parse component properties, if any
-			if (pProperties != nullptr)
+			if (ar.openBlock(guidBuffer, componentRecord.name))
 			{
-				pProperties->SerializeProperties(ar);
-			}
+				ar(Serialization::ActionButton([this, &componentRecord] { RemoveComponent(componentRecord.pComponent.get()); }, "icons:General/Element_Clear.ico"), "remove_component", "^Remove");
 
-			ar.closeBlock();
+				// Parse component properties, if any
+				if (pProperties != nullptr)
+				{
+					pProperties->SerializeProperties(ar);
+				}
+
+				ar.closeBlock();
+			}
 		}
 	});
 }
