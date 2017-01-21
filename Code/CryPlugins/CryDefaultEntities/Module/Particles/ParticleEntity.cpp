@@ -24,6 +24,14 @@ CParticleRegistrator g_particleRegistrator;
 
 CRYREGISTER_CLASS(CDefaultParticleEntity);
 
+CDefaultParticleEntity::~CDefaultParticleEntity()
+{
+	if (m_particleSlot != -1)
+	{
+		m_pEntity->FreeSlot(m_particleSlot);
+	}
+}
+
 void CDefaultParticleEntity::SetParticleEffectName(cstr effectName)
 {
 	m_particleEffectPath = effectName;

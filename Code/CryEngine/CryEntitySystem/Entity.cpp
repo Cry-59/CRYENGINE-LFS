@@ -1258,7 +1258,10 @@ void CEntity::SerializeProperties(Serialization::IArchive& ar)
 		{
 			if (ar.openBlock(guidBuffer, componentRecord.name))
 			{
-				ar(Serialization::ActionButton([this, &componentRecord] { RemoveComponent(componentRecord.pComponent.get()); }, "icons:General/Element_Clear.ico"), "remove_component", "^Remove");
+				if (ar.isEdit())
+				{
+					ar(Serialization::ActionButton([this, &componentRecord] { RemoveComponent(componentRecord.pComponent.get()); }, "icons:General/Element_Remove.ico"), "remove_component", "^Remove");
+				}
 
 				// Parse component properties, if any
 				if (pProperties != nullptr)

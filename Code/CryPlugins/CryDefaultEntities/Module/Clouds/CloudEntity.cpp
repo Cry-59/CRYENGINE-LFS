@@ -28,6 +28,14 @@ CCloudEntity::CCloudEntity()
 {
 }
 
+CCloudEntity::~CCloudEntity()
+{
+	if (m_cloudSlot != -1)
+	{
+		m_pEntity->FreeSlot(m_cloudSlot);
+	}
+}
+
 void CCloudEntity::Initialize()
 {
 	CDesignerEntityComponent::Initialize();

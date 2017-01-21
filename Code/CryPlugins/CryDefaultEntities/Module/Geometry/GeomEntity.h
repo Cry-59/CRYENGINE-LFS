@@ -10,7 +10,7 @@ class CGeomEntity final
 {
 	CRY_ENTITY_COMPONENT_CLASS(CGeomEntity, IGeometryEntityComponent, "Geometry", 0xEC0CD266A6D14774, 0xB499690BD6FB61EE);
 
-	virtual ~CGeomEntity() {}
+	virtual ~CGeomEntity();
 
 public:
 	enum EInputPorts

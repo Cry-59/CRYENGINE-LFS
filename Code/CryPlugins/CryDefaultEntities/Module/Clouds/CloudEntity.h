@@ -23,7 +23,7 @@ class CCloudEntity final
 
 public:
 	CCloudEntity();
-	virtual ~CCloudEntity() {}
+	virtual ~CCloudEntity();
 
 	// CDesignerEntityComponent
 	virtual void Initialize() override;

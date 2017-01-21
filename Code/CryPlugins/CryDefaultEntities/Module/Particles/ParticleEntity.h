@@ -13,7 +13,7 @@ class CDefaultParticleEntity final
 {
 	CRY_ENTITY_COMPONENT_CLASS(CDefaultParticleEntity, IParticleEntityComponent, "Particle", 0x31B3EAD4C34442F7, 0xB794B33746D4232B);
 
-	virtual ~CDefaultParticleEntity() {}
+	virtual ~CDefaultParticleEntity();
 
 public:
 	// CDesignerEntityComponent

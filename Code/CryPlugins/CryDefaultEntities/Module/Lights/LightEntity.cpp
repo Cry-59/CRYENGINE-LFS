@@ -48,6 +48,14 @@ YASLI_ENUM_END()
 
 CRYREGISTER_CLASS(CDefaultLightEntity);
 
+CDefaultLightEntity::~CDefaultLightEntity()
+{
+	if (m_lightSlot != -1)
+	{
+		m_pEntity->FreeSlot(m_lightSlot);
+	}
+}
+
 void CDefaultLightEntity::OnResetState()
 {
 	IEntity& entity = *GetEntity();

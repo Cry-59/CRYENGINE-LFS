@@ -20,6 +20,14 @@ CProbeRegistrator g_probeRegistrator;
 
 CRYREGISTER_CLASS(CEnvironmentProbeEntity);
 
+CEnvironmentProbeEntity::~CEnvironmentProbeEntity()
+{
+	if (m_lightSlot != -1)
+	{
+		m_pEntity->FreeSlot(m_lightSlot);
+	}
+}
+
 void CEnvironmentProbeEntity::OnResetState()
 {
 	IEntity& entity = *GetEntity();

@@ -17,7 +17,7 @@ class CEnvironmentProbeEntity final
 {
 	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CEnvironmentProbeEntity, "Environment Probe", 0x0D3D1840D239411E, 0x873814C56CCCEE2C);
 
-	virtual ~CEnvironmentProbeEntity() {}
+	virtual ~CEnvironmentProbeEntity();
 
 public:
 	// CDesignerEntityComponent

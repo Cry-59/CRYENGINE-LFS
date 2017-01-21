@@ -18,7 +18,7 @@ class CDefaultLightEntity final
 {
 	CRY_ENTITY_COMPONENT_INTERFACE_AND_CLASS(CDefaultLightEntity, "Light", 0x61BFE88AAB1C4DFB, 0xBBD263D328C3D037);
 
-	virtual ~CDefaultLightEntity() {}
+	virtual ~CDefaultLightEntity();
 
 	enum EFlowgraphInputPorts
 	{

@@ -58,6 +58,14 @@ void CGeomEntity::Initialize()
 	GetEntity()->SetFlags(GetEntity()->GetFlags() | ENTITY_FLAG_CASTSHADOW);
 }
 
+CGeomEntity::~CGeomEntity()
+{
+	if (m_geometrySlot != -1)
+	{
+		m_pEntity->FreeSlot(m_geometrySlot);
+	}
+}
+
 void CGeomEntity::ProcessEvent(SEntityEvent& event)
 {
 	CDesignerEntityComponent::ProcessEvent(event);
