@@ -139,6 +139,10 @@ struct vert2fragZ
 	#endif
 #endif
 
+#if %BLACKLIGHT_MATERIAL
+	float4 vPosition : TEXCOORDN;
+#endif
+
 	// deferred shading tdb: double check tessellation paths if all correct
 #if ENABLE_TESSELLATION && !%_RT_NO_TESSELLATION
 	float4 vView     : TEXCOORDN;

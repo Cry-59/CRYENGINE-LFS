@@ -164,3 +164,11 @@ Property
   DependencySet = $UserEnabled
   Hidden
 }
+
+Property
+{
+  Name = %BLACKLIGHT_MATERIAL
+  Mask = 0x100000000
+  Property    (Blacklight Material)
+  Description (Hidden unless viewed under a blacklight)
+}

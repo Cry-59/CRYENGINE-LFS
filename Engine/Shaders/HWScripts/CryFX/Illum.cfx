@@ -378,6 +378,44 @@ half DecalDiffuseOpacity
 > = 1;
 #endif
 
+#if %BLACKLIGHT_MATERIAL
+float4 Blacklight_Position
+<
+  register = REG_PM_PARAM_3;
+  string UIName = "Blacklight Position";
+  string UIWidget = "color";
+> = {0.0, 0.0, 0.0, 0.0};
+
+float4 Blacklight_Direction
+<
+  register = REG_PM_PARAM_4;
+  string UIName = "Blacklight Direction";
+  string UIWidget = "color";
+> = {0.0, 0.0, 0.0, 0.0};
+
+float Blacklight_FoV
+<
+  register = REG_PM_PARAM_5.x;
+   string UIWidget = "slider";
+  string UIName = "Blacklight Field of View";
+  float UIMin = 0.0;
+  float UIMax = 10000;
+  float UIStep = 0.001;
+> = 0.0;
+
+float Blacklight_Range
+<
+  register = REG_PM_PARAM_5.y;
+   string UIWidget = "slider";
+  string UIName = "Blacklight Range";
+  float UIMin = 0.0;
+  float UIMax = 10000;
+  float UIStep = 0.001;
+> = 0.0;
+
+CUSTOMSECONDARYMAP
+#endif
+
 float4 GlowParams : PB_GlowParams;
 
 
