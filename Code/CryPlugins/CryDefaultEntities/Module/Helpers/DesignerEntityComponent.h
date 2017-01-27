@@ -17,18 +17,13 @@ public:
 	{
 		switch (event.event)
 		{
-			// Physicalize on level start for Launcher
-			case ENTITY_EVENT_START_LEVEL:
-				// Editor specific, physicalize on reset, property change or transform change
-			case ENTITY_EVENT_RESET:
-			case ENTITY_EVENT_EDITOR_PROPERTY_CHANGED:
-			case ENTITY_EVENT_XFORM_FINISHED_EDITOR:
+			case ENTITY_EVENT_START_GAME:
 				OnResetState();
 				break;
 		}
 	}
 
-	virtual uint64 GetEventMask() const override { return BIT64(ENTITY_EVENT_START_LEVEL) | BIT64(ENTITY_EVENT_RESET) | BIT64(ENTITY_EVENT_EDITOR_PROPERTY_CHANGED) | BIT64(ENTITY_EVENT_XFORM_FINISHED_EDITOR); }
+	virtual uint64 GetEventMask() const override { return BIT64(ENTITY_EVENT_START_GAME); }
 	// ~IEntityComponent
 
 	void ActivateFlowNodeOutput(const int portIndex, const TFlowInputData& inputData)

@@ -85,12 +85,6 @@ void CEntityComponentArea::OnMove()
 					m_pArea->MovePoints(&s_tmpWorldPoints[0], numLocalPoints);
 					s_tmpWorldPoints.clear();
 				}
-				else
-				{
-#if defined(INCLUDE_ENTITYSYSTEM_PRODUCTION_CODE)
-					CryFatalError("An area shape without points cannot be moved.\nVerify that it is properly initialized.");
-#endif    // INCLUDE_ENTITYSYSTEM_PRODUCTION_CODE
-				}
 			}
 			break;
 		case ENTITY_AREA_TYPE_BOX:
@@ -411,8 +405,6 @@ void CEntityComponentArea::LegacySerializeXML(XmlNodeRef& entityNode, XmlNodeRef
 						m_pArea->SetSoundObstructionOnAreaFace(i, bObstructSound);
 					}
 				}
-
-				CRY_ASSERT(m_abObstructSound.size() == 6);
 			}
 		}
 
