@@ -432,7 +432,7 @@ void CAIActor::Reset(EObjectResetType type)
 	IEntity* pEntity(GetEntity());
 	if (pEntity)
 	{
-		m_bEnabled = pEntity->IsActive();
+		m_bEnabled = pEntity->IsActivatedForUpdates();
 		SetPos(pEntity->GetPos());
 	}
 

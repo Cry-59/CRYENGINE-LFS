@@ -5203,7 +5203,7 @@ void CActor::DumpActorInfo()
   
   Vec3 entPos(pEntity->GetWorldPos());
   CryLog("Entity Pos: %.f %.f %.f", entPos.x, entPos.y, entPos.z);
-  CryLog("Active: %i", pEntity->IsActive());
+  CryLog("Active: %i", pEntity->IsActivatedForUpdates());
   CryLog("Hidden: %i", pEntity->IsHidden());
   CryLog("Invisible: %i", pEntity->IsInvisible());  
   CryLog("Profile: %i", m_currentPhysProfile);

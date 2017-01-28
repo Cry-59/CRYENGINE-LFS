@@ -555,15 +555,6 @@ protected:
 	//! </returns>
 	int IsUsingPipe(IFunctionHandler* pH);
 
-	//! <code>Entity.Activate( bActivate )</code>
-	//! <description>
-	//!		Activates or deactivates entity.
-	//!		This calls ignores update policy and forces entity to activate or deactivate
-	//!		All active entities will be updated every frame, having too many active entities can affect performance.
-	//! </description>
-	//!		<param name="bActivate - if true entity will become active, is false will deactivate and stop being updated every frame.</param>
-	int Activate(IFunctionHandler* pH, int bActive);
-
 	//! <code>Entity.IsActive( bActivate )</code>
 	//! <description>Retrieve active status of entity.</description>
 	//!	<returns>

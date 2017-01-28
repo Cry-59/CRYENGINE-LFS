@@ -681,7 +681,7 @@ void CTurret::OnPrePhysicsUpdate()
 {
 	IEntity* const pEntity = GetEntity();
 
-	const bool isActive = pEntity->IsActive();
+	const bool isActive = pEntity->IsActivatedForUpdates();
 	if ( ! isActive )
 	{
 		const EntityId localPlayerEntityId = g_pGame->GetIGameFramework()->GetClientActorId();
@@ -697,7 +697,7 @@ void CTurret::OnPrePhysicsUpdate()
 				return;
 			}
 
-			pEntity->Activate( true );
+			GetGameObject()->EnableUpdateSlot(this, 0);
 		}
 	}
 

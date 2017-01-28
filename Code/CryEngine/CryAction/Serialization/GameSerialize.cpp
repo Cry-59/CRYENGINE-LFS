@@ -1138,7 +1138,6 @@ bool CGameSerialize::SaveEntities(SSaveEnvironment& savEnv)
 				bed.flags = flags;
 				bed.updatePolicy = (uint32)pEntity->GetUpdatePolicy();
 				bed.isHidden = pEntity->IsHidden();
-				bed.isActive = pEntity->IsActive();
 				bed.isInvisible = pEntity->IsInvisible();
 
 				bed.isPhysicsEnabled = pEntity->IsPhysicsEnabled();
@@ -1777,7 +1776,6 @@ void CGameSerialize::LoadGameData(SLoadEnvironment& loadEnv)
 
 		pEntity->Hide(false);
 		pEntity->Invisible(false);
-		pEntity->Activate(true);
 
 		// Warning: since the AI system serialize hasn't happened yet, the AI object won't exist yet (previous ones were
 		//  removed by the AI flush). Essentially, between this point and the AI serialize
@@ -1848,7 +1846,6 @@ void CGameSerialize::LoadGameData(SLoadEnvironment& loadEnv)
 				// moved to after serialize so physicalization works as expected
 				pEntity->Hide(iter->isHidden);
 				pEntity->Invisible(iter->isInvisible);
-				pEntity->Activate(iter->isActive);
 
 				{
 					pEntity->EnablePhysics(iter->isPhysicsEnabled);

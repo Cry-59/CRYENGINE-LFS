@@ -913,11 +913,11 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////
 
-	//! Activates entity, if entity is active it will be updated every frame.
-	virtual void Activate(bool bActive) = 0;
+	//! Used to update the stored mask for a certain component, from IEntityComponent::GetEventMask
+	virtual void UpdateComponentEventMask(IEntityComponent* pComponent) = 0;
 
-	//! Check if the entity is active now.
-	virtual bool IsActive() const = 0;
+	//! Checks whether the entity is set to be updated this / next frame.
+	virtual bool IsActivatedForUpdates() const = 0;
 
 	//! Activates entity, if entity is active it will be updated every frame.
 	virtual void PrePhysicsActivate(bool bActive) = 0;

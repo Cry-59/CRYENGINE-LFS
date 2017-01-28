@@ -155,7 +155,8 @@ CGameObject::CGameObject() :
 	m_bNoSyncPhysics(false),
 	m_bNeedsNetworkRebind(false),
 	m_bOnInitEventCalled(false),
-	m_cachedParentId(0)
+	m_cachedParentId(0),
+	m_bShouldUpdate(0)
 {
 	static_assert(eGFE_Last <= 64, "Unexpected enum value!");
 
@@ -895,17 +896,23 @@ void CGameObject::ProcessEvent(SEntityEvent& event)
 
 uint64 CGameObject::GetEventMask() const
 {
-	return
+	uint64 eventMask =
 	  BIT64(ENTITY_EVENT_INIT) |
 		BIT64(ENTITY_EVENT_RESET) |
 	  BIT64(ENTITY_EVENT_DONE) |
-	  BIT64(ENTITY_EVENT_UPDATE) |
 	  BIT64(ENTITY_EVENT_RENDER_VISIBILITY_CHANGE) |
 	  BIT64(ENTITY_EVENT_ENTERAREA) |
 	  BIT64(ENTITY_EVENT_LEAVEAREA) |
 	  BIT64(ENTITY_EVENT_POST_SERIALIZE) |
 	  BIT64(ENTITY_EVENT_HIDE) |
 	  BIT64(ENTITY_EVENT_UNHIDE);
+
+	if (m_bShouldUpdate)
+	{
+		eventMask |= BIT64(ENTITY_EVENT_UPDATE);
+	}
+
+	return eventMask;
 }
 
 //------------------------------------------------------------------------
@@ -1965,7 +1972,7 @@ void CGameObject::EvaluateUpdateActivation()
 
 void CGameObject::SetActivation(bool activate)
 {
-	bool wasActivated = m_pEntity->IsActive();
+	bool wasActivated = m_pEntity->IsActivatedForUpdates();
 
 	if (TestIsProbablyVisible(m_updateState))
 		SetPhysicsDisable(false);
@@ -1986,7 +1993,8 @@ void CGameObject::SetActivation(bool activate)
 
 	if (wasActivated != activate)
 	{
-		m_pEntity->Activate(activate);
+		m_bShouldUpdate = activate;
+		m_pEntity->UpdateComponentEventMask(this);
 
 		if (!activate)
 		{
@@ -2144,6 +2152,8 @@ void CGameObject::ForceUpdate(bool force)
 		--m_forceUpdate;
 
 	CRY_ASSERT(m_forceUpdate >= 0);
+
+	EvaluateUpdateActivation();
 }
 
 struct SContainerSer : public ISerializableInfo
@@ -2214,7 +2224,7 @@ bool CGameObject::SetAIActivation(EGameObjectAIActivationMode mode)
 		EvaluateUpdateActivation(); // need to recheck any updates on slots
 	}
 
-	return GetEntity()->IsActive();
+	return GetEntity()->IsActivatedForUpdates();
 }
 
 bool CGameObject::ShouldUpdateAI()

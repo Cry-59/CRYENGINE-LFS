@@ -84,36 +84,6 @@ void OnRemoveEntityCVarChange(ICVar* pArgs)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-void OnActivateEntityCVarChange(ICVar* pArgs)
-{
-	if (gEnv->pEntitySystem)
-	{
-		const char* szEntity = pArgs->GetString();
-		IEntity* pEnt = gEnv->pEntitySystem->FindEntityByName(szEntity);
-		if (pEnt)
-		{
-			CEntity* pcEnt = (CEntity*)(pEnt);
-			pcEnt->Activate(true);
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////
-void OnDeactivateEntityCVarChange(ICVar* pArgs)
-{
-	if (gEnv->pEntitySystem)
-	{
-		const char* szEntity = pArgs->GetString();
-		IEntity* pEnt = gEnv->pEntitySystem->FindEntityByName(szEntity);
-		if (pEnt)
-		{
-			CEntity* pcEnt = (CEntity*)(pEnt);
-			pcEnt->Activate(false);
-		}
-	}
-}
-
 //////////////////////////////////////////////////////////////////////
 SEntityLoadParams::SEntityLoadParams()
 {
@@ -257,8 +227,6 @@ CEntitySystem::CEntitySystem(ISystem* pSystem)
 	if (gEnv->pConsole != 0)
 	{
 		REGISTER_STRING_CB("es_removeEntity", "", VF_CHEAT, "Removes an entity", OnRemoveEntityCVarChange);
-		REGISTER_STRING_CB("es_activateEntity", "", VF_CHEAT, "Activates an entity", OnActivateEntityCVarChange);
-		REGISTER_STRING_CB("es_deactivateEntity", "", VF_CHEAT, "Deactivates an entity", OnDeactivateEntityCVarChange);
 	}
 }
 
@@ -868,7 +836,6 @@ void CEntitySystem::RemoveEntityFromActiveList(CEntity* pEntity)
 		m_mapActiveEntities.erase(pEntity->GetId());
 		ActivatePrePhysicsUpdateForEntity(pEntity, false);
 
-		pEntity->m_bActive = false;
 		if (pEntity->m_bInActiveList)
 		{
 			pEntity->m_bInActiveList = false;
@@ -1187,7 +1154,7 @@ void CEntitySystem::DebugDrawEntityUsage()
 				continue;
 
 			// Generate counts
-			uint32 uTotalCount = 0, uActiveCount = 0, uHiddenCount = 0, uTotalMemory = 0, uHiddenMemory = 0;
+			uint32 uTotalCount = 0, uHiddenCount = 0, uTotalMemory = 0, uHiddenMemory = 0;
 			TEntities::const_iterator itEntity = entities.begin();
 			TEntities::const_iterator itEntityEnd = entities.end();
 			for (; itEntity != itEntityEnd; ++itEntity)
@@ -1200,11 +1167,6 @@ void CEntitySystem::DebugDrawEntityUsage()
 				uTotalCount++;
 				uTotalMemory += itEntity->second;
 
-				if (pEntity->IsActive())
-				{
-					uActiveCount++;
-				}
-
 				if (pEntity->IsHidden())
 				{
 					uHiddenCount++;
@@ -1213,7 +1175,7 @@ void CEntitySystem::DebugDrawEntityUsage()
 			}
 
 			IRenderAuxText::Draw2dLabel(fColumnX_Class, fColumnY, 1.0f, colWhite, false, "%s", szName);
-			IRenderAuxText::Draw2dLabel(fColumnX_ActiveCount, fColumnY, 1.0f, colWhite, true, "%u", uActiveCount);
+			IRenderAuxText::Draw2dLabel(fColumnX_ActiveCount, fColumnY, 1.0f, colWhite, true, "%" PRISIZE_T, m_mapActiveEntities.size());
 			IRenderAuxText::Draw2dLabel(fColumnX_HiddenCount, fColumnY, 1.0f, colWhite, true, "%u", uHiddenCount);
 			IRenderAuxText::Draw2dLabel(fColumnX_MemoryUsage, fColumnY, 1.0f, colWhite, true, "%u (%uKb)", uTotalMemory, uTotalMemory / 1000);
 			IRenderAuxText::Draw2dLabel(fColumnX_MemoryHidden, fColumnY, 1.0f, colGreen, true, "%u (%uKb)", uHiddenMemory, uHiddenMemory / 1000);
@@ -1946,7 +1908,7 @@ void CEntitySystem::UpdateTimers()
 				if (CVar::es_DebugTimers)
 				{
 					if (pEntity)
-						CryLogAlways("OnTimer Event (timerID=%d,time=%dms) for Entity %s (which is %s)", event.nTimerId, event.nMilliSeconds, pEntity->GetEntityTextDescription().c_str(), pEntity->IsActive() ? "active" : "inactive");
+						CryLogAlways("OnTimer Event (timerID=%d,time=%dms) for Entity %s (which is %s)", event.nTimerId, event.nMilliSeconds, pEntity->GetEntityTextDescription().c_str(), pEntity->IsActivatedForUpdates() ? "active" : "inactive");
 				}
 			}
 		}
@@ -2856,7 +2818,7 @@ void CEntitySystem::DumpEntity(IEntity* pEntity)
 	string name(pEntity->GetName());
 	name += string("[$9") + pEntity->GetClass()->GetName() + string("$o]");
 	Vec3 pos(pEntity->GetWorldPos());
-	const char* sStatus = pEntity->IsActive() ? "[$3Active$o]" : "[$9Inactive$o]";
+	const char* sStatus = pEntity->IsActivatedForUpdates() ? "[$3Active$o]" : "[$9Inactive$o]";
 	if (pEntity->IsHidden())
 		sStatus = "[$9Hidden$o]";
 

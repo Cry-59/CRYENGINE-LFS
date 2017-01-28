@@ -471,11 +471,11 @@ private:
 			if (GetPortBool(pActInfo, IN_FORCE_UPDATE))
 			{
 				aparams.m_nFlags |= CA_FORCE_SKELETON_UPDATE;
-				if (pActInfo->pEntity->IsActive() == false)
-				{
-					m_bForcedActivate = true;
-					pActInfo->pEntity->Activate(true); // maybe unforce update as well
-				}
+
+				IGameObject* pGameObject = gEnv->pGameFramework->GetIGameObjectSystem()->CreateGameObjectForEntity(pActInfo->pEntity->GetId());
+				pGameObject->ForceUpdate(true);
+
+				m_bForcedActivate = true;
 
 				m_bForcedUpdateActivate = true;
 				SetForceUpdate(pActInfo->pEntity->GetId(), true);
@@ -539,7 +539,11 @@ private:
 		{
 			if (m_bForcedActivate)
 			{
-				pActInfo->pEntity->Activate(false);
+				if (IGameObject* pGameObject = gEnv->pGameFramework->GetGameObject(pActInfo->pEntity->GetId()))
+				{
+					pGameObject->ForceUpdate(false);
+				}
+
 				m_bForcedActivate = false;
 			}
 
@@ -619,7 +623,11 @@ private:
 			{
 				if (m_bForcedActivate)
 				{
-					pActInfo->pEntity->Activate(false);
+					if (IGameObject* pGameObject = gEnv->pGameFramework->GetGameObject(pActInfo->pEntity->GetId()))
+					{
+						pGameObject->ForceUpdate(false);
+					}
+
 					m_bForcedActivate = false;
 				}
 

@@ -274,7 +274,6 @@ CScriptBind_Entity::CScriptBind_Entity(IScriptSystem* pSS, ISystem* pSystem, IEn
 
 	SCRIPT_REG_FUNC(SetUpdateRadius);
 	SCRIPT_REG_FUNC(GetUpdateRadius);
-	SCRIPT_REG_TEMPLFUNC(Activate, "bActive");
 	SCRIPT_REG_TEMPLFUNC(IsActive, "");
 	SCRIPT_REG_TEMPLFUNC(SetUpdatePolicy, "nUpdatePolicy");
 	SCRIPT_REG_FUNC(SetPublicParam);
@@ -4908,18 +4907,10 @@ int CScriptBind_Entity::SetPublicParam(IFunctionHandler* pH)
 }
 
 //////////////////////////////////////////////////////////////////////////
-int CScriptBind_Entity::Activate(IFunctionHandler* pH, int bActive)
-{
-	GET_ENTITY;
-	pEntity->Activate(bActive != 0);
-	return pH->EndFunction();
-}
-
-//////////////////////////////////////////////////////////////////////////
 int CScriptBind_Entity::IsActive(IFunctionHandler* pH)
 {
 	GET_ENTITY;
-	bool bActive = pEntity->IsActive();
+	bool bActive = pEntity->IsActivatedForUpdates();
 	return pH->EndFunction(bActive);
 }
 

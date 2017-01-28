@@ -353,6 +353,7 @@ private:
 	bool              m_bNoSyncPhysics      : 1;
 	bool              m_bNeedsNetworkRebind : 1;
 	bool              m_bOnInitEventCalled  : 1;
+	bool              m_bShouldUpdate       : 1;
 	enum EUpdateState
 	{
 		eUS_Visible_Close = 0,

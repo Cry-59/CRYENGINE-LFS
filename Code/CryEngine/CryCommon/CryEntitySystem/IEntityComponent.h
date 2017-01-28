@@ -128,12 +128,13 @@ public:
 	//! Called on all Entity components right before all of the Entity Components are destructed.
 	virtual void OnShutDown() {};
 
-	// By overriding this function component will be able to handle events sent from the host Entity.
-	// Requires returning the desired event flag in GetEventMask.
-	// \param event Event structure, contains event id and parameters.
+	//! By overriding this function component will be able to handle events sent from the host Entity.
+	//! Requires returning the desired event flag in GetEventMask.
+	//! \param event Event structure, contains event id and parameters.
 	virtual	void ProcessEvent(SEntityEvent &event) {}
 
 	//! Return bit mask of the EEntityEvent flags that we want to receive in ProcessEvent (ex: BIT64(ENTITY_EVENT_HIDE)|BIT64(ENTITY_EVENT_UNHIDE))
+	//! If updated at runtime, call IEntity::UpdateComponentEventMask for the change to take effect.
 	virtual uint64                 GetEventMask() const { return 0; }
 
 	ComponentEventPriority GetEventPriority() const { return (ComponentEventPriority)GetProxyType(); }

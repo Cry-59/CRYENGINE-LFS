@@ -1369,10 +1369,13 @@ void CAnimEntityNode::Animate(SAnimContext& animContext)
 
 		if (bIsCutScene)
 		{
-			// Activate entity to force CEntityObject::Update which calls StartAnimationProcessing for skeletal animations.
-			// This solves problems in the first frame the entity becomes visible, because it won't be active.
-			// Only do it in cut scenes, because it is too for all sequences.
-			pEntity->Activate(true);
+			if (IGameObject* pGameObject = gEnv->pGameFramework->GetIGameObjectSystem()->CreateGameObjectForEntity(pEntity->GetId()))
+			{
+				// Activate entity to force CEntityObject::Update which calls StartAnimationProcessing for skeletal animations.
+				// This solves problems in the first frame the entity becomes visible, because it won't be active.
+				// Only do it in cut scenes, because it is too for all sequences.
+				pGameObject->ForceUpdate(true);
+			}
 		}
 	}
 

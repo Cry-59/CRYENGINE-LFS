@@ -52,15 +52,14 @@ class CEntityLayer : public IEntityLayer
 {
 	struct EntityProp
 	{
-		EntityProp() : m_id(0), m_bIsNoAwake(false), m_bIsHidden(false), m_bIsActive(false)
+		EntityProp() : m_id(0), m_bIsNoAwake(false), m_bIsHidden(false)
 		{
 		}
 
-		EntityProp(EntityId id, bool bIsNoAwake, bool bIsHidden, bool bIsActive)
+		EntityProp(EntityId id, bool bIsNoAwake, bool bIsHidden)
 			: m_id(id)
 			, m_bIsNoAwake(bIsNoAwake)
 			, m_bIsHidden(bIsHidden)
-			, m_bIsActive(bIsActive)
 		{
 		}
 
@@ -72,7 +71,6 @@ class CEntityLayer : public IEntityLayer
 		EntityId m_id;
 		bool     m_bIsNoAwake : 1;
 		bool     m_bIsHidden  : 1;
-		bool     m_bIsActive  : 1;
 	};
 
 	struct EntityPropFindPred

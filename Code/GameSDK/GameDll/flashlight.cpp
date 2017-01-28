@@ -179,8 +179,6 @@ void CFlashLight::EnableFogVolume(CWeapon* pWeapon, int slot, bool enable)
 		}
 
 		EntityScripts::CallScriptFunction(pFogVolume, pFogVolume->GetScriptTable(), "OnPropertyChange");
-
-		pFogVolume->Activate(true);
 	}
 	else
 	{
