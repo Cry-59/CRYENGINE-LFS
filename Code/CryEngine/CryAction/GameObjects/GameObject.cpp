@@ -118,6 +118,8 @@ static float g_visibilityTimeoutTime = 0.0f;
 static std::set<CGameObject*> g_updateSchedulingProfile;
 static CryCriticalSection g_updateSchedulingProfileCritSec;
 
+CRYREGISTER_CLASS(CGameObject);
+
 void CGameObject::CreateCVars()
 {
 	REGISTER_CVAR(g_forceFastUpdate, 0, VF_CHEAT, "GameObjects IsProbablyVisible->TRUE && IsProbablyDistant()->FALSE");
