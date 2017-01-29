@@ -865,7 +865,20 @@ void CEntity::OnRellocate(int nWhyFlags)
 
 IMaterial* CEntity::GetRenderMaterial(int nSlot) const
 {
-	return m_render.GetRenderMaterial(nSlot);
+	if (IMaterial* pMaterial = m_render.GetRenderMaterial(nSlot))
+	{
+		return pMaterial;
+	}
+
+	if (IEntityRopeComponent* pRopeProxy = (IEntityRopeComponent*)GetProxy(ENTITY_PROXY_ROPE))
+	{
+		if (IRopeRenderNode* pRopeRenderNode = pRopeProxy->GetRopeRenderNode())
+		{
+			return pRopeRenderNode->GetMaterial();
+		}
+	}
+
+	return nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////
