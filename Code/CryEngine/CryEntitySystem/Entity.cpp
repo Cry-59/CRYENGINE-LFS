@@ -1097,6 +1097,8 @@ void CEntity::UpdateComponentEventMask(IEntityComponent* pComponent)
 				{
 					m_bRequiresComponentUpdate = 1;
 
+					ActivateEntityIfNecessary();
+
 					break;
 				}
 			}
