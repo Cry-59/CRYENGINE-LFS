@@ -6,14 +6,10 @@
 #include <jsmn.h>
 #include <jsmnutil.h>
 
-static string file_get_contents(const string& sProjectFile)
-{
-#if CRY_PLATFORM_WINDOWS
-	FILE* file = _wfopen(CryStringUtils::UTF8ToWStr(sProjectFile), L"rb");
-#else
-	FILE* file = fopen(sProjectFile.c_str(), "rb");
-#endif
+#include <Shlwapi.h>
 
+static string file_get_contents(FILE* file)
+{
 	string buffer;
 	if (file != NULL)
 	{
@@ -111,10 +107,31 @@ void CProjectManager::LoadConfiguration()
 
 	m_bEnabled = true;
 
-	const char* sProjectFile = arg->GetValue();
+	string sProjectFile = arg->GetValue();
+#if CRY_PLATFORM_WINDOWS
+	FILE* file = _wfopen(CryStringUtils::UTF8ToWStr(sProjectFile), L"rb");
+#else
+	FILE* file = fopen(sProjectFile.c_str(), "rb");
+#endif
+	if (file == nullptr)
+	{
+		return;
+	}
 
-	string js = file_get_contents(sProjectFile);
+#if CRY_PLATFORM_WINAPI
+	if (PathIsRelative(sProjectFile))
+#elif CRY_PLATFORM_POSIX
+	if(sProjectFile[0] != '/')
+#endif
+	{
+		char buffer[MAX_PATH];
+		CryGetCurrentDirectory(MAX_PATH, buffer);
 
+		sProjectFile = PathUtil::Make(buffer, sProjectFile);
+	}
+
+	string js = file_get_contents(file);
+	
 	// Set the current directory
 	m_currentProjectDirectory = PathUtil::RemoveSlash(PathUtil::ToUnixPath(PathUtil::GetPathWithoutFilename(sProjectFile)));
 
